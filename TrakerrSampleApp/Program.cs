@@ -16,6 +16,7 @@ namespace TrakerrSampleApp
         {
             try
             {
+                
                 throw new Exception("This is a test exception.");
             }
             catch (Exception e)

@@ -27,7 +27,7 @@ namespace IO.TrakerrClient
         {
             var client = new TrakerrClient();
 
-            var exceptionEvent = client.GetNewAppEvent(classification, exception.GetType().ToString(), exception.Message);
+            var exceptionEvent = client.CreateAppEvent(classification, exception.GetType().ToString(), exception.Message);
 
             exceptionEvent.EventStacktrace = EventTraceBuilder.GetEventTraces(exception);
 
@@ -124,9 +124,23 @@ namespace IO.TrakerrClient
         /// <param name="eventType">Type of event (eg. System.Exception), defaults to "unknonwn"</param>
         /// <param name="eventMessage">Message, defaults to "unknown"</param>
         /// <returns>Newly created AppEvent</returns>
-        public AppEvent GetNewAppEvent(string classification = "Error", string eventType = "unknown", string eventMessage = "unknown")
+        public AppEvent CreateAppEvent(string classification = "Error", string eventType = "unknown", string eventMessage = "unknown")
         {
             return new AppEvent(this.apiKey, classification, eventType, eventMessage);
+        }
+
+        /// <summary>
+        /// Use this to bootstrap a new AppEvent object from an exception.
+        /// </summary>
+        /// <param name="exception">The Exception to use to create the new AppEvent</param>
+        /// <returns>Newly created AppEvent</returns>
+        public AppEvent CreateAppEventFromException(string classification, Exception exception)
+        {
+            var exceptionEvent = CreateAppEvent(classification, exception.GetType().ToString(), exception.Message);
+
+            exceptionEvent.EventStacktrace = EventTraceBuilder.GetEventTraces(exception);
+
+            return exceptionEvent;
         }
 
         /// <summary>

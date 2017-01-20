@@ -68,7 +68,7 @@ namespace TrakerrSampleApp
 }
 ```
 
-### Option-2: Send any event (including non-exceptions) programmatically
+### Option-2: Send an exception with custom properties to Trakerr
 ```csharp
 using IO.TrakerrClient;
 using System;
@@ -88,7 +88,46 @@ namespace TrakerrSampleApp
         {
             var client = new TrakerrClient();
 
-            var event = client.GetNewAppEvent("Info", "System.Exception", "Some message");
+            try {
+                ...
+            } catch(Exception e) {
+                var exceptionEvent = client.CreateAppEventFromException("Error", e);
+
+                exceptionEvent.CustomProperties = new IO.Trakerr.Model.CustomData();
+                exceptionEvent.CustomProperties.StringData = new IO.Trakerr.Model.CustomStringData();
+                exceptionEvent.CustomProperties.StringData.CustomData1 = "Some custom data";
+
+                client.SendEventAsync(exceptionEvent);
+            }
+
+        }
+    }
+}
+```
+
+
+
+### Option-3: Send any event (including non-exceptions) programmatically
+```csharp
+using IO.TrakerrClient;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TrakerrSampleApp
+{
+    /// <summary>
+    /// Sample program to generate an event
+    /// </summary>
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var client = new TrakerrClient();
+
+            var event = client.CreateAppEvent("Info", "System.Exception", "Some message");
 
             client.SendEventAsync(event);
         }
