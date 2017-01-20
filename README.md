@@ -100,5 +100,5 @@ namespace TrakerrSampleApp
 <a name="documentation-for-models"></a>
 ## Documentation for Models
 
- - [Model.AppEvent](https://github.com/trakerr/trakerr-csharp/blob/master/generated/docs/AppEvent.md)
+ - [Model.AppEvent](https://github.com/trakerr-io/trakerr-csharp/blob/master/generated/docs/AppEvent.md)
 
