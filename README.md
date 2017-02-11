@@ -7,7 +7,7 @@ Get your application events and errors to Trakerr via the *Trakerr API*.
 
 ## Frameworks supported
 - .NET 4.0 or later
-- Windows Phone 7.1 (Mango)
+- Windows Phone 7.1 (Mango) and later.
 
 ## Dependencies
 - [IO.TrakerrClient](http://www.nuget.org/packages/IO.TrakerrClient/) - 1.0.0 or later
@@ -135,6 +135,34 @@ namespace TrakerrSampleApp
 }
 ```
 
+##About the TrakerrClient Constructor
+
+The `TrakerrClient` class above can be constructed to take aditional data, rather than using the configured defaults. The constructor signature is:
+
+```csharp
+public TrakerrClient(string apiKey = null, string url = null, string contextAppVersion = null,
+string contextEnvName = "development", string contextEnvVersion = null,
+string contextEnvHostname = null, string contextAppOS = null,
+string contextAppOSVersion = null, string contextDataCenter = null,
+string contextDataCenterRegion = null)
+```
+
+Nearly all of these have default values when passed in null. Below is a list of the arguments, and what Trakerr expects so you can pass in custom data.
+
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**api_key** | **str** | API Key for your application. | Defaults to reading "trakerr.apiKey" property under appSettings from the App.config.
+**url_path** | **str** | URL to Trakerr. | Defaults to reading "trakerr.url" property under appSettings from the App.config.
+**context_app_version** | **str** |  Provide the application version. | Defaults to reading "trakerr.contextAppVersion" property under appSettings from the App.config.
+**context_env_name** | **str** | Provide the environemnt name (development/staging/production). You can also pass in a custom name. | Defaults to reading "trakerr.contextEnvName" property under appSettings from the App.config.
+**context_env_version** | **str** | (Optional) Provide an optional context environment version. | Defaults to `null`. 
+**context_env_hostname** | **str** | Provide the current hostname. | Defaults to the current DNS name if available or uses the Machine name as a fallback.
+**context_app_os** | **str** | Provide an operating system name. | Defaults to Environment.OSVersion.Platform along with the service pack (eg. Win32NT Service Pack 1).
+**context_app_os_version** | **str** | Provide an operating system version. | Defaults to Environment.OSVersion.Version.ToString() (eg. 6.1.7601.65536).
+**context_data_center** | **str** | (optional) Provide a datacenter name. | Defaults to `null`.
+**context_data_center_region** | **str** | (optional) Provide a datacenter region. | Defaults to `null`.
+
+If you want to use a default value in a custom call, simply pass in `null` to the argument, and it will be filled with the default value.
 
 <a name="documentation-for-models"></a>
 ## Documentation for Models
