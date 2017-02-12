@@ -151,16 +151,16 @@ Nearly all of these have default values when passed in null. Below is a list of 
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**api_key** | **str** | API Key for your application. | Defaults to reading "trakerr.apiKey" property under appSettings from the App.config.
-**url_path** | **str** | URL to Trakerr. | Defaults to reading "trakerr.url" property under appSettings from the App.config.
-**context_app_version** | **str** |  Provide the application version. | Defaults to reading "trakerr.contextAppVersion" property under appSettings from the App.config.
-**context_env_name** | **str** | Provide the environemnt name (development/staging/production). You can also pass in a custom name. | Defaults to reading "trakerr.contextEnvName" property under appSettings from the App.config.
-**context_env_version** | **str** | (Optional) Provide an optional context environment version. | Defaults to `null`. 
-**context_env_hostname** | **str** | Provide the current hostname. | Defaults to the current DNS name if available or uses the Machine name as a fallback.
-**context_app_os** | **str** | Provide an operating system name. | Defaults to Environment.OSVersion.Platform along with the service pack (eg. Win32NT Service Pack 1).
-**context_app_os_version** | **str** | Provide an operating system version. | Defaults to Environment.OSVersion.Version.ToString() (eg. 6.1.7601.65536).
-**context_data_center** | **str** | (optional) Provide a datacenter name. | Defaults to `null`.
-**context_data_center_region** | **str** | (optional) Provide a datacenter region. | Defaults to `null`.
+**apiKey** | **str** | API Key for your application. | Defaults to reading "trakerr.apiKey" property under appSettings from the App.config.
+**url** | **str** | URL to Trakerr. | Defaults to reading "trakerr.url" property under appSettings from the App.config.
+**contextAppVersion** | **str** |  Provide the application version. | Defaults to reading "trakerr.contextAppVersion" property under appSettings from the App.config.
+**contextEnvName** | **str** | Provide the environemnt name (development/staging/production). You can also pass in a custom name. | Defaults to reading "trakerr.contextEnvName" property under appSettings from the App.config.
+**contextEnvVersion** | **str** | (Optional) Provide an optional context environment version. | Defaults to `null`. 
+**contextEnvHostname** | **str** | Provide the current hostname. | Defaults to the current DNS name if available or uses the Machine name as a fallback.
+**contextAppOS** | **str** | Provide an operating system name. | Defaults to Environment.OSVersion.Platform along with the service pack (eg. Win32NT Service Pack 1).
+**contextAppOSVersion** | **str** | Provide an operating system version. | Defaults to Environment.OSVersion.Version.ToString() (eg. 6.1.7601.65536).
+**contextDataCenter** | **str** | (optional) Provide a datacenter name. | Defaults to `null`.
+**contextDataCenterRegion** | **str** | (optional) Provide a datacenter region. | Defaults to `null`.
 
 If you want to use a default value in a custom call, simply pass in `null` to the argument, and it will be filled with the default value.
 
