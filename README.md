@@ -135,7 +135,7 @@ namespace TrakerrSampleApp
 }
 ```
 
-##About the TrakerrClient Constructor
+## About the TrakerrClient Constructor
 
 The `TrakerrClient` class above can be constructed to take aditional data, rather than using the configured defaults. The constructor signature is:
 
@@ -147,7 +147,7 @@ string contextAppOSVersion = null, string contextDataCenter = null,
 string contextDataCenterRegion = null)
 ```
 
-Nearly all of these have default values when passed in null. Below is a list of the arguments, and what Trakerr expects so you can pass in custom data.
+Nearly all of these have default values when passed in `null`. Below is a list of the arguments, and what Trakerr expects so you can pass in custom data.
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
