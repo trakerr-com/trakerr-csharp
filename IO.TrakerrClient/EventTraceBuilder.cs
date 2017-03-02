@@ -2,15 +2,22 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace IO.Trakerr.Client
 {
+    /// <summary>
+    /// EventTraceBuilder uses the swagger codegenned classes to serialize the system stacktrace and returns it.
+    /// See the swagger code for more information about the stacktrace object.
+    /// </summary>
     public class EventTraceBuilder
     {
+        /// <summary>
+        /// Returns a Stactrace object contain the e stactrace, line by line.
+        /// </summary>
+        /// <param name="e">The e that's stacktrace should be parsed.</param>
+        /// <returns>A Stacktrace object which holds a list of InnerStackTraces with the data.</returns>
         public static Stacktrace GetEventTraces(Exception e)
         {
             if (e == null) return null;
@@ -19,24 +26,35 @@ namespace IO.Trakerr.Client
             return traces;
         }
 
-        private static void AddStackTrace(List<InnerStackTrace> traces, Exception exception)
+        /// <summary>
+        /// Adds an InnerStackTrace to the trace object and parses it.
+        /// </summary>
+        /// <param name="traces">A lost of InnerStackTraces which gets one gets added too.
+        /// Should normally be a Stacktrace object.</param>
+        /// <param name="e">The exception object to parse from.</param>
+        private static void AddStackTrace(List<InnerStackTrace> traces, Exception e)
         {
             InnerStackTrace newTrace = new InnerStackTrace();
             MethodBase catchingMethod;
 
-            newTrace.TraceLines = GetEventTraceLines(exception, out catchingMethod);
-            newTrace.Type = exception.GetType().FullName;
-            newTrace.Message = exception.Message;
+            newTrace.TraceLines = GetEventTraceLines(e, out catchingMethod);
+            newTrace.Type = e.GetType().FullName;
+            newTrace.Message = e.Message;
             traces.Add(newTrace);
 
-            if (exception.InnerException != null)
+            if (e.InnerException != null)
             {
-                AddStackTrace(traces, exception.InnerException);
+                AddStackTrace(traces, e.InnerException);
             }
         }
 
-
-        private static StackTraceLines GetEventTraceLines(Exception exception, out MethodBase catchingMethod)
+        /// <summary>
+        /// Parses each specific line in the trace and adds it to the InnerStackTraces in a serializable list format.
+        /// </summary>
+        /// <param name="e">The exception to parse.</param>
+        /// <param name="catchingMethod"> A reference to the method that threw the error.</param>
+        /// <returns>A StackTraceLines object which holds the parsed Stacktrace.</returns>
+        private static StackTraceLines GetEventTraceLines(Exception e, out MethodBase catchingMethod)
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
 
@@ -51,7 +69,7 @@ namespace IO.Trakerr.Client
                                  : assembly.EntryPoint;
 
             StackTraceLines lines = new StackTraceLines();
-            var stackTrace = new StackTrace(exception, true);
+            var stackTrace = new StackTrace(e, true);
             StackFrame[] frames = stackTrace.GetFrames();
 
             if (frames == null || frames.Length == 0)

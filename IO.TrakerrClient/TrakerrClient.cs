@@ -21,15 +21,15 @@ namespace IO.TrakerrClient
         /// <summary>
         /// Send an exception to Trakerr.
         /// </summary>
-        /// <param name="exception">The exception</param>
+        /// <param name="e">The exception caught.</param>
         /// <param name="classification">The classification ("Error", "Warning", "Info", "Debug")</param>
-        public static void SendToTrakerr(this Exception exception, string classification = "Error")
+        public static void SendToTrakerr(this Exception e, string classification = "Error")
         {
             var client = new TrakerrClient();
 
-            var exceptionEvent = client.CreateAppEvent(classification, exception.GetType().ToString(), exception.Message);
+            var exceptionEvent = client.CreateAppEvent(classification, e.GetType().ToString(), e.Message);
 
-            exceptionEvent.EventStacktrace = EventTraceBuilder.GetEventTraces(exception);
+            exceptionEvent.EventStacktrace = EventTraceBuilder.GetEventTraces(e);
 
             client.SendEventAsync(exceptionEvent);
         }
@@ -61,30 +61,22 @@ namespace IO.TrakerrClient
         private string apiKey;
         private string contextAppVersion;
         private string contextEnvName;
-        private string contextEnvVersion;
-        private string contextEnvHostname;
-        private string contextAppOS;
-        private string contextAppOSVersion;
-        private string contextDataCenter;
-        private string contextDataCenterRegion;
+        public string ContextEnvVersion { get; set; }
+        public string ContextEnvHostname { get; set; }
+        public string ContextAppOS { get; set; }
+        public string ContextAppOSVersion { get; set; }
+        public string ContextDataCenter { get; set; }
+        public string ContextDataCenterRegion { get; set; }
 
         /// <summary>
         /// Create a new Trakerr client to use in your application. This class is thread-safe and can be invoked from multiple threads. This class also acts as a factory to create new AppEvent's with the supplied apiKey and other data.
         /// </summary>
         /// <param name="apiKey">API Key for your application, defaults to reading "trakerr.apiKey" property under appSettings from the App.config.</param>
-        /// <param name="url">URL to Trakerr, defaults to reading "trakerr.url" property under appSettings from the App.config.</param>
         /// <param name="contextAppVersion">Provide the application version, defaults to reading "trakerr.contextAppVersion" property under appSettings from the App.config.</param>
         /// <param name="contextEnvName">Provide the environemnt name (development/staging/production). You can also pass in a custom name. Defaults to reading "trakerr.contextEnvName" property under appSettings from the App.config</param>
-        /// <param name="contextEnvVersion">Provide an optional context environment version.</param>
-        /// <param name="contextEnvHostname">Provide the current hostname, defaults to the current DNS name if available or uses the Machine name as a fallback.</param>
-        /// <param name="contextAppOS">Provide an operating system name, defaults to Environment.OSVersion.Platform along with the service pack (eg. Win32NT Service Pack 1).</param>
-        /// <param name="contextAppOSVersion">Provide an operating system version, defaults to Environment.OSVersion.Version.ToString() (eg. 6.1.7601.65536)</param>
-        /// <param name="contextDataCenter">Provide a datacenter name, defaults to null.</param>
-        /// <param name="contextDataCenterRegion">Provide a datacenter region, defaults to null.</param>
-        public TrakerrClient(string apiKey = null, string url = null, string contextAppVersion = null, string contextEnvName = "development", string contextEnvVersion = null, string contextEnvHostname = null, string contextAppOS = null, string contextAppOSVersion = null, string contextDataCenter = null, string contextDataCenterRegion = null)
+        public TrakerrClient(string apiKey = null, string contextAppVersion = null, string contextEnvName = "development")
         {
             if (apiKey == null) apiKey = ConfigurationManager.AppSettings["trakerr.apiKey"];
-            if (url == null) url = ConfigurationManager.AppSettings["trakerr.url"];
             if (contextAppVersion == null) contextAppVersion = ConfigurationManager.AppSettings["trakerr.contextAppVersion"];
             if (contextEnvName == null) contextEnvName = ConfigurationManager.AppSettings["trakerr.contextEnvName"];
 
@@ -92,29 +84,32 @@ namespace IO.TrakerrClient
             this.contextAppVersion = contextAppVersion;
 
             this.contextEnvName = contextEnvName;
-            this.contextEnvVersion = contextEnvVersion;
-            if (contextEnvHostname == null)
+            this.ContextEnvVersion = Type.GetType("Mono.Runtime") != null ? "Mono" : "Microsoft CLI";
+
+            //Refactor 2 will push what is now contextEnvVersion to contextEnvName
+            //To get the version then, follow: https://msdn.microsoft.com/en-us/library/hh925568(v=vs.110).aspx for
+            //Microsoft CLI and (probably) Enviroment.Version for Mono 
+
+            if (ContextEnvHostname == null)
             {
                 try
                 {
-                    this.contextEnvHostname = Dns.GetHostName();
+                    this.ContextEnvHostname = Dns.GetHostName();
                 }
                 catch(SocketException)
                 {
-                    this.contextEnvHostname = Environment.MachineName;
+                    this.ContextEnvHostname = Environment.MachineName;
                 }
             } 
             else
             {
-                this.contextEnvHostname = contextEnvHostname;
+                this.ContextEnvHostname = ContextEnvHostname;
             }
 
-            this.contextAppOS = contextAppOS == null ? Environment.OSVersion.Platform + " " + Environment.OSVersion.ServicePack : contextAppOS;
-            this.contextAppOSVersion = contextAppOSVersion == null ? Environment.OSVersion.Version.ToString() : contextAppOSVersion;
-            this.contextDataCenter = contextDataCenter;
-            this.contextDataCenterRegion = contextDataCenterRegion;
+            this.ContextAppOS = ContextAppOS == null ? Environment.OSVersion.Platform + " " + Environment.OSVersion.ServicePack : ContextAppOS;
+            this.ContextAppOSVersion = ContextAppOSVersion == null ? Environment.OSVersion.Version.ToString() : ContextAppOSVersion;
 
-            eventsApi = new EventsApi(url);
+            eventsApi = new EventsApi(ConfigurationManager.AppSettings["trakerr.url"]);
         }
 
         /// <summary>
@@ -130,7 +125,7 @@ namespace IO.TrakerrClient
         }
 
         /// <summary>
-        /// Use this to bootstrap a new AppEvent object from an exception.
+        /// Use this to bootstrap a new AppEvent object from an e.
         /// </summary>
         /// <param name="exception">The Exception to use to create the new AppEvent</param>
         /// <returns>Newly created AppEvent</returns>
@@ -179,17 +174,17 @@ namespace IO.TrakerrClient
             if (appEvent.ContextAppVersion == null) appEvent.ContextAppVersion = contextAppVersion;
 
             if (appEvent.ContextEnvName == null) appEvent.ContextEnvName = this.contextEnvName;
-            if (appEvent.ContextEnvVersion == null) appEvent.ContextEnvVersion = this.contextEnvVersion;
-            if (appEvent.ContextEnvHostname == null) appEvent.ContextEnvHostname = this.contextEnvHostname;
+            if (appEvent.ContextEnvVersion == null) appEvent.ContextEnvVersion = this.ContextEnvVersion;
+            if (appEvent.ContextEnvHostname == null) appEvent.ContextEnvHostname = this.ContextEnvHostname;
 
             if (appEvent.ContextAppOS == null)
             {
-                appEvent.ContextAppOS = this.contextAppOS;
-                appEvent.ContextAppOSVersion = this.contextAppOSVersion;
+                appEvent.ContextAppOS = this.ContextAppOS;
+                appEvent.ContextAppOSVersion = this.ContextAppOSVersion;
             }
 
-            if (appEvent.ContextDataCenter == null) appEvent.ContextDataCenter = contextDataCenter;
-            if (appEvent.ContextDataCenterRegion == null) appEvent.ContextDataCenterRegion = contextDataCenterRegion;
+            if (appEvent.ContextDataCenter == null) appEvent.ContextDataCenter = ContextDataCenter;
+            if (appEvent.ContextDataCenterRegion == null) appEvent.ContextDataCenterRegion = ContextDataCenterRegion;
 
             if (!appEvent.EventTime.HasValue) appEvent.EventTime = (long)(DateTime.Now - DT_EPOCH).TotalMilliseconds;
         }
