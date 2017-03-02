@@ -61,11 +61,35 @@ namespace IO.TrakerrClient
         private string apiKey;
         private string contextAppVersion;
         private string contextEnvName;
+
+        /// <summary>
+        /// ContextEnvVersion is the version of the CLI the program is run on.
+        /// </summary>
         public string ContextEnvVersion { get; set; }
+
+        /// <summary>
+        /// ContextEnvHostname is hostname of the pc run
+        /// </summary>
         public string ContextEnvHostname { get; set; }
+
+        /// <summary>
+        /// ContextAppOS is the OS the program is running on.
+        /// </summary>
         public string ContextAppOS { get; set; }
+
+        /// <summary>
+        /// ContextAppOSVersion is the version of the OS the code is running on.
+        /// </summary>
         public string ContextAppOSVersion { get; set; }
+
+        /// <summary>
+        /// ContextDatacenter is the optional datacenter the code may be running on.
+        /// </summary>
         public string ContextDataCenter { get; set; }
+
+        /// <summary>
+        /// ContextDatacenterRegion is the optional datacenter region the code may be running on.
+        /// </summary>
         public string ContextDataCenterRegion { get; set; }
 
         /// <summary>
