@@ -68,7 +68,7 @@ namespace IO.TrakerrClient
         public string ContextEnvVersion { get; set; }
 
         /// <summary>
-        /// ContextEnvHostname is hostname of the pc run
+        /// ContextEnvHostname is hostname of the pc running the code.
         /// </summary>
         public string ContextEnvHostname { get; set; }
 
