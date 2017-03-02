@@ -63,32 +63,42 @@ namespace IO.TrakerrClient
         private string contextEnvName;
 
         /// <summary>
-        /// ContextEnvVersion is the version of the CLI the program is run on.
+        /// The version of the CLI the application is run on.
         /// </summary>
         public string ContextEnvVersion { get; set; }
 
         /// <summary>
-        /// ContextEnvHostname is hostname of the pc running the code.
+        /// The hostname of the pc running the application.
         /// </summary>
         public string ContextEnvHostname { get; set; }
 
         /// <summary>
-        /// ContextAppOS is the OS the program is running on.
+        /// The OS the application is running on.
         /// </summary>
         public string ContextAppOS { get; set; }
 
         /// <summary>
-        /// ContextAppOSVersion is the version of the OS the code is running on.
+        /// The version of the OS the application is running on.
         /// </summary>
         public string ContextAppOSVersion { get; set; }
 
         /// <summary>
-        /// ContextDatacenter is the optional datacenter the code may be running on.
+        /// Optional. Useful For  MVC and ASP.net applications the browser name the application is running on.
+        /// </summary>
+        public string ContextAppOSBrowser { get; set; }
+
+        /// <summary>
+        /// Optional. Useful for MVC and ASP.net applications the browser version the application is running on.
+        /// </summary>
+        public string ContextAppOSBrowserVersion { get; set; }
+
+        /// <summary>
+        /// Optional. Datacenter the application may be running on.
         /// </summary>
         public string ContextDataCenter { get; set; }
 
         /// <summary>
-        /// ContextDatacenterRegion is the optional datacenter region the code may be running on.
+        /// Optional. Datacenter region the application may be running on.
         /// </summary>
         public string ContextDataCenterRegion { get; set; }
 
@@ -206,6 +216,9 @@ namespace IO.TrakerrClient
                 appEvent.ContextAppOS = this.ContextAppOS;
                 appEvent.ContextAppOSVersion = this.ContextAppOSVersion;
             }
+
+            appEvent.ContextAppBrowser = appEvent.ContextAppBrowser == null ? this.ContextAppOSBrowser : appEvent.ContextAppBrowser;
+            appEvent.ContextAppBrowserVersion = appEvent.ContextAppBrowserVersion == null ? this.ContextAppOSBrowserVersion : appEvent.ContextAppBrowserVersion;
 
             if (appEvent.ContextDataCenter == null) appEvent.ContextDataCenter = ContextDataCenter;
             if (appEvent.ContextDataCenterRegion == null) appEvent.ContextDataCenterRegion = ContextDataCenterRegion;
