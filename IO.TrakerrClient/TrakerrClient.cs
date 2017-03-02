@@ -83,7 +83,7 @@ namespace IO.TrakerrClient
         public string ContextAppOSVersion { get; set; }
 
         /// <summary>
-        /// Optional. Useful For  MVC and ASP.net applications the browser name the application is running on.
+        /// Optional. Useful For MVC and ASP.net applications the browser name the application is running on.
         /// </summary>
         public string ContextAppOSBrowser { get; set; }
 
