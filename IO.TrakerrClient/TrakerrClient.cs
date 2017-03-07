@@ -58,9 +58,9 @@ namespace IO.TrakerrClient
         private static DateTime DT_EPOCH = new DateTime(1970, 1, 1);
         private EventsApi eventsApi;
 
-        private string apiKey;
-        private string contextAppVersion;
-        private string contextEnvName;
+        public string apiKey { get; set; }
+        public string contextAppVersion { get; set; }
+        public string contextEnvName { get; set; }
 
         /// <summary>
         /// The version of the CLI the application is run on.
