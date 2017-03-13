@@ -40,6 +40,51 @@ namespace IO.Trakerr.Model
     public partial class AppEvent :  IEquatable<AppEvent>
     {
         /// <summary>
+        /// (optional) Logging level, one of 'debug','info','warning','error', 'fatal', defaults to 'error'
+        /// </summary>
+        /// <value>(optional) Logging level, one of 'debug','info','warning','error', 'fatal', defaults to 'error'</value>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum LogLevelEnum
+        {
+            
+            /// <summary>
+            /// Enum Debug for "debug"
+            /// </summary>
+            [EnumMember(Value = "debug")]
+            Debug,
+            
+            /// <summary>
+            /// Enum Info for "info"
+            /// </summary>
+            [EnumMember(Value = "info")]
+            Info,
+            
+            /// <summary>
+            /// Enum Warning for "warning"
+            /// </summary>
+            [EnumMember(Value = "warning")]
+            Warning,
+            
+            /// <summary>
+            /// Enum Error for "error"
+            /// </summary>
+            [EnumMember(Value = "error")]
+            Error,
+            
+            /// <summary>
+            /// Enum Fatal for "fatal"
+            /// </summary>
+            [EnumMember(Value = "fatal")]
+            Fatal
+        }
+
+        /// <summary>
+        /// (optional) Logging level, one of 'debug','info','warning','error', 'fatal', defaults to 'error'
+        /// </summary>
+        /// <value>(optional) Logging level, one of 'debug','info','warning','error', 'fatal', defaults to 'error'</value>
+        [DataMember(Name="logLevel", EmitDefaultValue=false)]
+        public LogLevelEnum? LogLevel { get; set; }
+        /// <summary>
         /// Initializes a new instance of the <see cref="AppEvent" /> class.
         /// </summary>
         [JsonConstructorAttribute]
@@ -48,15 +93,18 @@ namespace IO.Trakerr.Model
         /// Initializes a new instance of the <see cref="AppEvent" /> class.
         /// </summary>
         /// <param name="ApiKey">API key generated for the application (required).</param>
-        /// <param name="Classification">one of &#39;debug&#39;,&#39;info&#39;,&#39;warning&#39;,&#39;error&#39; or a custom string (required).</param>
-        /// <param name="EventType">type or event or error (eg. NullPointerException) (required).</param>
+        /// <param name="LogLevel">(optional) Logging level, one of &#39;debug&#39;,&#39;info&#39;,&#39;warning&#39;,&#39;error&#39;, &#39;fatal&#39;, defaults to &#39;error&#39;.</param>
+        /// <param name="Classification">(optional) one of &#39;error&#39; or a custom string for non-errors, defaults to &#39;error&#39; (required).</param>
+        /// <param name="EventType">type of the event or error (eg. NullPointerException) (required).</param>
         /// <param name="EventMessage">message containing details of the event or error (required).</param>
         /// <param name="EventTime">(optional) event time in ms since epoch.</param>
         /// <param name="EventStacktrace">EventStacktrace.</param>
         /// <param name="EventUser">(optional) event user identifying a user.</param>
         /// <param name="EventSession">(optional) session identification.</param>
         /// <param name="ContextAppVersion">(optional) application version information.</param>
-        /// <param name="ContextEnvName">(optional) one of &#39;development&#39;,&#39;staging&#39;,&#39;production&#39; or a custom string.</param>
+        /// <param name="DeploymentStage">(optional) deployment stage, one of &#39;development&#39;,&#39;staging&#39;,&#39;production&#39; or a custom string.</param>
+        /// <param name="ContextEnvName">(optional) environment name (like &#39;cpython&#39; or &#39;ironpython&#39; etc.).</param>
+        /// <param name="ContextEnvLanguage">(optional) language (like &#39;python&#39; or &#39;c#&#39; etc.).</param>
         /// <param name="ContextEnvVersion">(optional) version of environment.</param>
         /// <param name="ContextEnvHostname">(optional) hostname or ID of environment.</param>
         /// <param name="ContextAppBrowser">(optional) browser name if running in a browser (eg. Chrome).</param>
@@ -67,7 +115,7 @@ namespace IO.Trakerr.Model
         /// <param name="ContextDataCenterRegion">(optional) Data center region.</param>
         /// <param name="CustomProperties">CustomProperties.</param>
         /// <param name="CustomSegments">CustomSegments.</param>
-        public AppEvent(string ApiKey = null, string Classification = null, string EventType = null, string EventMessage = null, long? EventTime = null, Stacktrace EventStacktrace = null, string EventUser = null, string EventSession = null, string ContextAppVersion = null, string ContextEnvName = null, string ContextEnvVersion = null, string ContextEnvHostname = null, string ContextAppBrowser = null, string ContextAppBrowserVersion = null, string ContextAppOS = null, string ContextAppOSVersion = null, string ContextDataCenter = null, string ContextDataCenterRegion = null, CustomData CustomProperties = null, CustomData CustomSegments = null)
+        public AppEvent(string ApiKey = null, LogLevelEnum? LogLevel = null, string Classification = null, string EventType = null, string EventMessage = null, long? EventTime = null, Stacktrace EventStacktrace = null, string EventUser = null, string EventSession = null, string ContextAppVersion = null, string DeploymentStage = null, string ContextEnvName = null, string ContextEnvLanguage = null, string ContextEnvVersion = null, string ContextEnvHostname = null, string ContextAppBrowser = null, string ContextAppBrowserVersion = null, string ContextAppOS = null, string ContextAppOSVersion = null, string ContextDataCenter = null, string ContextDataCenterRegion = null, CustomData CustomProperties = null, CustomData CustomSegments = null)
         {
             // to ensure "ApiKey" is required (not null)
             if (ApiKey == null)
@@ -105,12 +153,15 @@ namespace IO.Trakerr.Model
             {
                 this.EventMessage = EventMessage;
             }
+            this.LogLevel = LogLevel;
             this.EventTime = EventTime;
             this.EventStacktrace = EventStacktrace;
             this.EventUser = EventUser;
             this.EventSession = EventSession;
             this.ContextAppVersion = ContextAppVersion;
+            this.DeploymentStage = DeploymentStage;
             this.ContextEnvName = ContextEnvName;
+            this.ContextEnvLanguage = ContextEnvLanguage;
             this.ContextEnvVersion = ContextEnvVersion;
             this.ContextEnvHostname = ContextEnvHostname;
             this.ContextAppBrowser = ContextAppBrowser;
@@ -130,15 +181,15 @@ namespace IO.Trakerr.Model
         [DataMember(Name="apiKey", EmitDefaultValue=false)]
         public string ApiKey { get; set; }
         /// <summary>
-        /// one of &#39;debug&#39;,&#39;info&#39;,&#39;warning&#39;,&#39;error&#39; or a custom string
+        /// (optional) one of &#39;error&#39; or a custom string for non-errors, defaults to &#39;error&#39;
         /// </summary>
-        /// <value>one of &#39;debug&#39;,&#39;info&#39;,&#39;warning&#39;,&#39;error&#39; or a custom string</value>
+        /// <value>(optional) one of &#39;error&#39; or a custom string for non-errors, defaults to &#39;error&#39;</value>
         [DataMember(Name="classification", EmitDefaultValue=false)]
         public string Classification { get; set; }
         /// <summary>
-        /// type or event or error (eg. NullPointerException)
+        /// type of the event or error (eg. NullPointerException)
         /// </summary>
-        /// <value>type or event or error (eg. NullPointerException)</value>
+        /// <value>type of the event or error (eg. NullPointerException)</value>
         [DataMember(Name="eventType", EmitDefaultValue=false)]
         public string EventType { get; set; }
         /// <summary>
@@ -177,11 +228,23 @@ namespace IO.Trakerr.Model
         [DataMember(Name="contextAppVersion", EmitDefaultValue=false)]
         public string ContextAppVersion { get; set; }
         /// <summary>
-        /// (optional) one of &#39;development&#39;,&#39;staging&#39;,&#39;production&#39; or a custom string
+        /// (optional) deployment stage, one of &#39;development&#39;,&#39;staging&#39;,&#39;production&#39; or a custom string
         /// </summary>
-        /// <value>(optional) one of &#39;development&#39;,&#39;staging&#39;,&#39;production&#39; or a custom string</value>
+        /// <value>(optional) deployment stage, one of &#39;development&#39;,&#39;staging&#39;,&#39;production&#39; or a custom string</value>
+        [DataMember(Name="deploymentStage", EmitDefaultValue=false)]
+        public string DeploymentStage { get; set; }
+        /// <summary>
+        /// (optional) environment name (like &#39;cpython&#39; or &#39;ironpython&#39; etc.)
+        /// </summary>
+        /// <value>(optional) environment name (like &#39;cpython&#39; or &#39;ironpython&#39; etc.)</value>
         [DataMember(Name="contextEnvName", EmitDefaultValue=false)]
         public string ContextEnvName { get; set; }
+        /// <summary>
+        /// (optional) language (like &#39;python&#39; or &#39;c#&#39; etc.)
+        /// </summary>
+        /// <value>(optional) language (like &#39;python&#39; or &#39;c#&#39; etc.)</value>
+        [DataMember(Name="contextEnvLanguage", EmitDefaultValue=false)]
+        public string ContextEnvLanguage { get; set; }
         /// <summary>
         /// (optional) version of environment
         /// </summary>
@@ -249,6 +312,7 @@ namespace IO.Trakerr.Model
             var sb = new StringBuilder();
             sb.Append("class AppEvent {\n");
             sb.Append("  ApiKey: ").Append(ApiKey).Append("\n");
+            sb.Append("  LogLevel: ").Append(LogLevel).Append("\n");
             sb.Append("  Classification: ").Append(Classification).Append("\n");
             sb.Append("  EventType: ").Append(EventType).Append("\n");
             sb.Append("  EventMessage: ").Append(EventMessage).Append("\n");
@@ -257,7 +321,9 @@ namespace IO.Trakerr.Model
             sb.Append("  EventUser: ").Append(EventUser).Append("\n");
             sb.Append("  EventSession: ").Append(EventSession).Append("\n");
             sb.Append("  ContextAppVersion: ").Append(ContextAppVersion).Append("\n");
+            sb.Append("  DeploymentStage: ").Append(DeploymentStage).Append("\n");
             sb.Append("  ContextEnvName: ").Append(ContextEnvName).Append("\n");
+            sb.Append("  ContextEnvLanguage: ").Append(ContextEnvLanguage).Append("\n");
             sb.Append("  ContextEnvVersion: ").Append(ContextEnvVersion).Append("\n");
             sb.Append("  ContextEnvHostname: ").Append(ContextEnvHostname).Append("\n");
             sb.Append("  ContextAppBrowser: ").Append(ContextAppBrowser).Append("\n");
@@ -310,6 +376,11 @@ namespace IO.Trakerr.Model
                     this.ApiKey.Equals(other.ApiKey)
                 ) && 
                 (
+                    this.LogLevel == other.LogLevel ||
+                    this.LogLevel != null &&
+                    this.LogLevel.Equals(other.LogLevel)
+                ) && 
+                (
                     this.Classification == other.Classification ||
                     this.Classification != null &&
                     this.Classification.Equals(other.Classification)
@@ -350,9 +421,19 @@ namespace IO.Trakerr.Model
                     this.ContextAppVersion.Equals(other.ContextAppVersion)
                 ) && 
                 (
+                    this.DeploymentStage == other.DeploymentStage ||
+                    this.DeploymentStage != null &&
+                    this.DeploymentStage.Equals(other.DeploymentStage)
+                ) && 
+                (
                     this.ContextEnvName == other.ContextEnvName ||
                     this.ContextEnvName != null &&
                     this.ContextEnvName.Equals(other.ContextEnvName)
+                ) && 
+                (
+                    this.ContextEnvLanguage == other.ContextEnvLanguage ||
+                    this.ContextEnvLanguage != null &&
+                    this.ContextEnvLanguage.Equals(other.ContextEnvLanguage)
                 ) && 
                 (
                     this.ContextEnvVersion == other.ContextEnvVersion ||
@@ -419,6 +500,8 @@ namespace IO.Trakerr.Model
                 // Suitable nullity checks etc, of course :)
                 if (this.ApiKey != null)
                     hash = hash * 59 + this.ApiKey.GetHashCode();
+                if (this.LogLevel != null)
+                    hash = hash * 59 + this.LogLevel.GetHashCode();
                 if (this.Classification != null)
                     hash = hash * 59 + this.Classification.GetHashCode();
                 if (this.EventType != null)
@@ -435,8 +518,12 @@ namespace IO.Trakerr.Model
                     hash = hash * 59 + this.EventSession.GetHashCode();
                 if (this.ContextAppVersion != null)
                     hash = hash * 59 + this.ContextAppVersion.GetHashCode();
+                if (this.DeploymentStage != null)
+                    hash = hash * 59 + this.DeploymentStage.GetHashCode();
                 if (this.ContextEnvName != null)
                     hash = hash * 59 + this.ContextEnvName.GetHashCode();
+                if (this.ContextEnvLanguage != null)
+                    hash = hash * 59 + this.ContextEnvLanguage.GetHashCode();
                 if (this.ContextEnvVersion != null)
                     hash = hash * 59 + this.ContextEnvVersion.GetHashCode();
                 if (this.ContextEnvHostname != null)

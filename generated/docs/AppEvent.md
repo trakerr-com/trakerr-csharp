@@ -4,15 +4,18 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ApiKey** | **string** | API key generated for the application | 
-**Classification** | **string** | one of &#39;debug&#39;,&#39;info&#39;,&#39;warning&#39;,&#39;error&#39; or a custom string | 
-**EventType** | **string** | type or event or error (eg. NullPointerException) | 
+**LogLevel** | **string** | (optional) Logging level, one of &#39;debug&#39;,&#39;info&#39;,&#39;warning&#39;,&#39;error&#39;, &#39;fatal&#39;, defaults to &#39;error&#39; | [optional] 
+**Classification** | **string** | (optional) one of &#39;error&#39; or a custom string for non-errors, defaults to &#39;error&#39; | 
+**EventType** | **string** | type of the event or error (eg. NullPointerException) | 
 **EventMessage** | **string** | message containing details of the event or error | 
 **EventTime** | **long?** | (optional) event time in ms since epoch | [optional] 
 **EventStacktrace** | [**Stacktrace**](Stacktrace.md) |  | [optional] 
 **EventUser** | **string** | (optional) event user identifying a user | [optional] 
 **EventSession** | **string** | (optional) session identification | [optional] 
 **ContextAppVersion** | **string** | (optional) application version information | [optional] 
-**ContextEnvName** | **string** | (optional) one of &#39;development&#39;,&#39;staging&#39;,&#39;production&#39; or a custom string | [optional] 
+**DeploymentStage** | **string** | (optional) deployment stage, one of &#39;development&#39;,&#39;staging&#39;,&#39;production&#39; or a custom string | [optional] 
+**ContextEnvName** | **string** | (optional) environment name (like &#39;cpython&#39; or &#39;ironpython&#39; etc.) | [optional] 
+**ContextEnvLanguage** | **string** | (optional) language (like &#39;python&#39; or &#39;c#&#39; etc.) | [optional] 
 **ContextEnvVersion** | **string** | (optional) version of environment | [optional] 
 **ContextEnvHostname** | **string** | (optional) hostname or ID of environment | [optional] 
 **ContextAppBrowser** | **string** | (optional) browser name if running in a browser (eg. Chrome) | [optional] 

@@ -86,7 +86,7 @@ limitations under the License.
   <Import Project="$(MsBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
       <ProjectReference Include="..\IO.Trakerr\IO.Trakerr.csproj">
-          <Project>{BB542020-52A0-4488-862D-9232D4777DF4}</Project>
+          <Project>{E4AC3EC0-A3C3-4272-94DA-7C20E00AA3A6}</Project>
           <Name>IO.Trakerr</Name>
       </ProjectReference>
   </ItemGroup>
