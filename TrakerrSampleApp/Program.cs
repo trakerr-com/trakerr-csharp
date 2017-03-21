@@ -22,6 +22,8 @@ namespace TrakerrSampleApp
                 // Send the event to Trakerr
                 e.SendToTrakerr();
             }
+            Console.Out.WriteLine("Done!");
+            Console.In.ReadLine();//Give time for the Async tasks to print to console.
         }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using IO.Trakerr.Api;
 using IO.Trakerr.Client;
 using IO.Trakerr.Model;
+using Microsoft.Win32;
 using System;
 using System.Configuration;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 
 /// <summary>
 /// Trakerr.IO namespace
@@ -22,16 +24,12 @@ namespace IO.TrakerrClient
         /// Send an exception to Trakerr.
         /// </summary>
         /// <param name="e">The exception caught.</param>
-        /// <param name="classification">The classification ("Error", "Warning", "Info", "Debug")</param>
-        public static void SendToTrakerr(this Exception e, string classification = "Error")
+        /// <param name="classification">Optional extra string descriptor. Defaults to issue.</param>
+        public static void SendToTrakerr(this Exception e, string classification = "issue")
         {
             var client = new TrakerrClient();
 
-            var exceptionEvent = client.CreateAppEvent(classification, e.GetType().ToString(), e.Message);
-
-            exceptionEvent.EventStacktrace = EventTraceBuilder.GetEventTraces(e);
-
-            client.SendEventAsync(exceptionEvent);
+            client.SendEventAsync(client.CreateAppEvent(e, classification));
         }
     }
 
@@ -60,112 +58,147 @@ namespace IO.TrakerrClient
 
         public string apiKey { get; set; }
         public string contextAppVersion { get; set; }
+        public string contextDeploymentStage { get; set; }
+
+        /// <summary>
+        /// A constant property with the name of the language this is compiled from. Is set in a constructor argument (so you can pass in managed c++ or VB), but defaults to c#
+        /// </summary>
+        public string contextEnvLanguage { get; }
+
+        /// <summary>
+        /// Name of the CLI the program is running on.
+        /// </summary>
         public string contextEnvName { get; set; }
 
         /// <summary>
         /// The version of the CLI the application is run on.
         /// </summary>
-        public string ContextEnvVersion { get; set; }
+        public string contextEnvVersion { get; set; }
 
         /// <summary>
         /// The hostname of the pc running the application.
         /// </summary>
-        public string ContextEnvHostname { get; set; }
+        public string contextEnvHostname { get; set; }
 
         /// <summary>
         /// The OS the application is running on.
         /// </summary>
-        public string ContextAppOS { get; set; }
+        public string contextAppOS { get; set; }
 
         /// <summary>
         /// The version of the OS the application is running on.
         /// </summary>
-        public string ContextAppOSVersion { get; set; }
+        public string contextAppOSVersion { get; set; }
 
         /// <summary>
         /// Optional. Useful For MVC and ASP.net applications the browser name the application is running on.
         /// </summary>
-        public string ContextAppOSBrowser { get; set; }
+        public string contextAppOSBrowser { get; set; }
 
         /// <summary>
         /// Optional. Useful for MVC and ASP.net applications the browser version the application is running on.
         /// </summary>
-        public string ContextAppOSBrowserVersion { get; set; }
+        public string contextAppOSBrowserVersion { get; set; }
 
         /// <summary>
         /// Optional. Datacenter the application may be running on.
         /// </summary>
-        public string ContextDataCenter { get; set; }
+        public string contextDataCenter { get; set; }
 
         /// <summary>
         /// Optional. Datacenter region the application may be running on.
         /// </summary>
-        public string ContextDataCenterRegion { get; set; }
+        public string contextDataCenterRegion { get; set; }
 
         /// <summary>
         /// Create a new Trakerr client to use in your application. This class is thread-safe and can be invoked from multiple threads. This class also acts as a factory to create new AppEvent's with the supplied apiKey and other data.
         /// </summary>
         /// <param name="apiKey">API Key for your application, defaults to reading "trakerr.apiKey" property under appSettings from the App.config.</param>
         /// <param name="contextAppVersion">Provide the application version, defaults to reading "trakerr.contextAppVersion" property under appSettings from the App.config.</param>
-        /// <param name="contextEnvName">Provide the environemnt name (development/staging/production). You can also pass in a custom name. Defaults to reading "trakerr.contextEnvName" property under appSettings from the App.config</param>
-        public TrakerrClient(string apiKey = null, string contextAppVersion = null, string contextEnvName = "development")
+        /// <param name="contextDeploymentStage">Provide the string representation of the deployment stage (development/staging/production). You can also pass in a custom name. Defaults to reading "trakerr.contextDeploymentStage" property under appSettings from the App.config</param>
+        /// <param name="contextEnvLanguage">String representation of the language being used. If not provided defaults to C#, but can be passed other items in a string like "VB" or "Managed C++"</param>
+        public TrakerrClient(string apiKey = null, string contextAppVersion = null, string contextDeploymentStage = null, string contextEnvLanguage = "C#")
         {
             if (apiKey == null) apiKey = ConfigurationManager.AppSettings["trakerr.apiKey"];
             if (contextAppVersion == null) contextAppVersion = ConfigurationManager.AppSettings["trakerr.contextAppVersion"];
-            if (contextEnvName == null) contextEnvName = ConfigurationManager.AppSettings["trakerr.contextEnvName"];
+            if (contextDeploymentStage == null) contextDeploymentStage = ConfigurationManager.AppSettings["trakerr.eploymentStage"];
 
             this.apiKey = apiKey;
             this.contextAppVersion = contextAppVersion;
+            this.contextDeploymentStage = contextDeploymentStage;
 
-            this.contextEnvName = contextEnvName;
-            this.ContextEnvVersion = Type.GetType("Mono.Runtime") != null ? "Mono" : "Microsoft CLI";
+            this.contextEnvLanguage = contextEnvLanguage;
+            this.contextEnvName = Type.GetType("Mono.Runtime") != null ? "Mono" : "Microsoft CLI";
+
+            this.contextEnvVersion = null;
+            Type type = Type.GetType("Mono.Runtime");
+            if (type != null)
+            {
+                MethodInfo displayName = type.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
+                if (displayName != null)
+                    this.contextEnvVersion = displayName.Invoke(null, null).ToString();
+            }
+            else
+            {
+                try//Code might not work on non-windows.
+                {
+                    this.contextEnvVersion = TrakerrClient.Get45PlusFromRegistry();
+                }
+                catch
+                {
+                    this.contextEnvVersion = null;
+                }   
+            }
+            
 
             //Refactor 2 will push what is now contextEnvVersion to contextEnvName
             //To get the version then, follow: https://msdn.microsoft.com/en-us/library/hh925568(v=vs.110).aspx for
             //Microsoft CLI and (probably) Enviroment.Version for Mono 
 
-            if (ContextEnvHostname == null)
+            if (contextEnvHostname == null)
             {
                 try
                 {
-                    this.ContextEnvHostname = Dns.GetHostName();
+                    this.contextEnvHostname = Dns.GetHostName();
                 }
                 catch(SocketException)
                 {
-                    this.ContextEnvHostname = Environment.MachineName;
+                    this.contextEnvHostname = Environment.MachineName;
                 }
             } 
             else
             {
-                this.ContextEnvHostname = ContextEnvHostname;
+                this.contextEnvHostname = contextEnvHostname;
             }
 
-            this.ContextAppOS = ContextAppOS == null ? Environment.OSVersion.Platform + " " + Environment.OSVersion.ServicePack : ContextAppOS;
-            this.ContextAppOSVersion = ContextAppOSVersion == null ? Environment.OSVersion.Version.ToString() : ContextAppOSVersion;
+            this.contextAppOS = contextAppOS == null ? Environment.OSVersion.Platform + " " + Environment.OSVersion.ServicePack : contextAppOS;
+            this.contextAppOSVersion = contextAppOSVersion == null ? Environment.OSVersion.Version.ToString() : contextAppOSVersion;
 
             eventsApi = new EventsApi(ConfigurationManager.AppSettings["trakerr.url"]);
         }
 
         /// <summary>
-        /// Use this to bootstrap a new AppEvent object with the supplied classification, event type and message.
+        /// Use this to bootstrap a new AppEvent object with the supplied logLevel, classification, event type and message.
         /// </summary>
-        /// <param name="classification">Classification (Error/Warning/Info/Debug or custom string), defaults to "Error".</param>
+        /// <param name="logLevel">String representation of the level (Error/Warning/Info/Debug) of the error, defaults to "Error" if null or passed in something else.</param>
+        /// <param name="classification">Optional extra string descriptor. Defaults to issue.</param>
         /// <param name="eventType">Type of event (eg. System.Exception), defaults to "unknonwn"</param>
         /// <param name="eventMessage">Message, defaults to "unknown"</param>
         /// <returns>Newly created AppEvent</returns>
-        public AppEvent CreateAppEvent(string classification = "Error", string eventType = "unknown", string eventMessage = "unknown")
-        {
-            return new AppEvent(this.apiKey, classification, eventType, eventMessage);
+        public AppEvent CreateAppEvent(AppEvent.LogLevelEnum logLevel = AppEvent.LogLevelEnum.Error, string classification = "issue", string eventType = "unknown", string eventMessage = "unknown")
+        {            
+            return new AppEvent(this.apiKey, logLevel, classification, eventType, eventMessage);
         }
 
         /// <summary>
         /// Use this to bootstrap a new AppEvent object from an e.
         /// </summary>
         /// <param name="exception">The Exception to use to create the new AppEvent</param>
+        /// <param name="classification">Optional extra string descriptor. Defaults to issue.</param>
         /// <returns>Newly created AppEvent</returns>
-        public AppEvent CreateAppEventFromException(string classification, Exception exception)
+        public AppEvent CreateAppEvent(Exception exception, string classification = "issue")
         {
-            var exceptionEvent = CreateAppEvent(classification, exception.GetType().ToString(), exception.Message);
+            var exceptionEvent = CreateAppEvent(classification: classification, eventType: exception.GetType().ToString(), eventMessage: exception.Message);
 
             exceptionEvent.EventStacktrace = EventTraceBuilder.GetEventTraces(exception);
 
@@ -181,7 +214,9 @@ namespace IO.TrakerrClient
             // fill defaults if not overridden in the AppEvent being passed
             FillDefaults(appEvent);
 
-            eventsApi.EventsPost(appEvent);
+            var response = eventsApi.EventsPostWithHttpInfo(appEvent);
+            Console.Error.WriteLine("Status Code:" + response.StatusCode);
+            Console.Error.WriteLine(response.Data);
         }
 
         /// <summary>
@@ -193,7 +228,9 @@ namespace IO.TrakerrClient
             // fill defaults if not overridden in the AppEvent being passed
             FillDefaults(appEvent);
 
-            await eventsApi.EventsPostAsync(appEvent);
+            var response = await eventsApi.EventsPostAsyncWithHttpInfo(appEvent);
+            await Console.Error.WriteLineAsync("Status Code:" + response.StatusCode);
+            await Console.Error.WriteLineAsync(response.Data.ToString());
         }
 
 
@@ -204,26 +241,73 @@ namespace IO.TrakerrClient
         private void FillDefaults(AppEvent appEvent)
         {
             if (appEvent.ApiKey == null) appEvent.ApiKey = apiKey;
-
             if (appEvent.ContextAppVersion == null) appEvent.ContextAppVersion = contextAppVersion;
+            appEvent.DeploymentStage = appEvent.DeploymentStage == null ? this.contextDeploymentStage : appEvent.DeploymentStage;
 
+            appEvent.ContextEnvLanguage = appEvent.ContextEnvLanguage == null ? this.contextEnvLanguage : appEvent.ContextEnvLanguage;
             if (appEvent.ContextEnvName == null) appEvent.ContextEnvName = this.contextEnvName;
-            if (appEvent.ContextEnvVersion == null) appEvent.ContextEnvVersion = this.ContextEnvVersion;
-            if (appEvent.ContextEnvHostname == null) appEvent.ContextEnvHostname = this.ContextEnvHostname;
+            if (appEvent.ContextEnvVersion == null) appEvent.ContextEnvVersion = this.contextEnvVersion;
+            if (appEvent.ContextEnvHostname == null) appEvent.ContextEnvHostname = this.contextEnvHostname;
 
             if (appEvent.ContextAppOS == null)
             {
-                appEvent.ContextAppOS = this.ContextAppOS;
-                appEvent.ContextAppOSVersion = this.ContextAppOSVersion;
+                appEvent.ContextAppOS = this.contextAppOS;
+                appEvent.ContextAppOSVersion = this.contextAppOSVersion;
             }
 
-            appEvent.ContextAppBrowser = appEvent.ContextAppBrowser == null ? this.ContextAppOSBrowser : appEvent.ContextAppBrowser;
-            appEvent.ContextAppBrowserVersion = appEvent.ContextAppBrowserVersion == null ? this.ContextAppOSBrowserVersion : appEvent.ContextAppBrowserVersion;
+            appEvent.ContextAppBrowser = appEvent.ContextAppBrowser == null ? this.contextAppOSBrowser : appEvent.ContextAppBrowser;
+            appEvent.ContextAppBrowserVersion = appEvent.ContextAppBrowserVersion == null ? this.contextAppOSBrowserVersion : appEvent.ContextAppBrowserVersion;
 
-            if (appEvent.ContextDataCenter == null) appEvent.ContextDataCenter = ContextDataCenter;
-            if (appEvent.ContextDataCenterRegion == null) appEvent.ContextDataCenterRegion = ContextDataCenterRegion;
+            if (appEvent.ContextDataCenter == null) appEvent.ContextDataCenter = contextDataCenter;
+            if (appEvent.ContextDataCenterRegion == null) appEvent.ContextDataCenterRegion = contextDataCenterRegion;
 
             if (!appEvent.EventTime.HasValue) appEvent.EventTime = (long)(DateTime.Now - DT_EPOCH).TotalMilliseconds;
+        }
+
+        private static string Get45PlusFromRegistry()
+        {
+            const string subkey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";
+            using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey(subkey))
+            {
+                if (ndpKey != null && ndpKey.GetValue("Release") != null)
+                {
+                    return CheckFor45PlusVersion((int)ndpKey.GetValue("Release"));
+                }
+                else
+                {
+                    return System.Environment.Version.ToString();
+                }
+            }
+        }
+
+        // Checking the version using >= will enable forward compatibility.
+        private static string CheckFor45PlusVersion(int releaseKey)
+        {
+            if (releaseKey >= 394802)
+                return "4.6.2 or later";
+            if (releaseKey >= 394254)
+            {
+                return "4.6.1";
+            }
+            if (releaseKey >= 393295)
+            {
+                return "4.6";
+            }
+            if ((releaseKey >= 379893))
+            {
+                return "4.5.2";
+            }
+            if ((releaseKey >= 378675))
+            {
+                return "4.5.1";
+            }
+            if ((releaseKey >= 378389))
+            {
+                return "4.5";
+            }
+            // This code should never execute. A non-null release key should mean
+            // that 4.5 or later is installed.
+            return "No 4.5 or later version detected";
         }
 
     }
