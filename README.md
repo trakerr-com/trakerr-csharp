@@ -40,10 +40,6 @@ To send an exception to Trakerr, it's as simple as calling .SendToTrakerr() on t
 ```csharp
 using IO.TrakerrClient;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TrakerrSampleApp
 {
@@ -68,14 +64,13 @@ namespace TrakerrSampleApp
 }
 ```
 
-### Option-2: Send an exception with custom properties to Trakerr
+### Option-2: Send an exception using the TrakerrClient
+The benifit of using the TrakerrClient to automatically create and send your error, as opposed to above, is that you can change the log level. You will, however, have to also add an import.
+
 ```csharp
 using IO.TrakerrClient;
+using IO.Trakerr.Model;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TrakerrSampleApp
 {
@@ -88,18 +83,55 @@ namespace TrakerrSampleApp
         {
             var client = new TrakerrClient();
 
-            try {
-                ...
-            } catch(Exception e) {
-                var exceptionEvent = client.CreateAppEventFromException("Error", e);
-
-                exceptionEvent.CustomProperties = new IO.Trakerr.Model.CustomData();
-                exceptionEvent.CustomProperties.StringData = new IO.Trakerr.Model.CustomStringData();
-                exceptionEvent.CustomProperties.StringData.CustomData1 = "Some custom data";
-
-                client.SendEventAsync(exceptionEvent);
+            try
+            {
+                throw new ArgumentException("Args are invalid.");
             }
+            catch (Exception e)
+            {
+                tc.SendException(e);//Can also change the log level, along with the classifcation, unlike the above which only changes issue.
+            }
+        }
+    }
+}
+```
 
+### Option-3: Send an exception using the TrakerrClient
+You can get an appevent to change and store custom data. You must then call to manually send it afterwards.
+
+```csharp
+using IO.TrakerrClient;
+using IO.Trakerr.Model;
+using System;
+
+namespace TrakerrSampleApp
+{
+    /// <summary>
+    /// Sample program to generate an event
+    /// </summary>
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var client = new TrakerrClient();
+
+            try
+            {
+                throw new IndexOutOfRangeException("Buffer overflow.");
+            }
+            catch (Exception e)
+            {
+                var appevent = tc.CreateAppEvent(e, AppEvent.LogLevelEnum.Fatal);//Can also change the classification.
+                //EventType and EventMessage are set automatically by create app event; you can set them manually from the appevent instance too.
+                appevent.EventUser = "john@trakerr.io";
+                appevent.EventSession = "8";
+
+                appevent.CustomProperties = new CustomData();
+                appevent.CustomProperties.StringData = new CustomStringData("This is string data 1!");//Add up to 10 custom strings.
+                appevent.CustomProperties.StringData.CustomData2 = "This is string data 2!";//You can also add strings later like this.
+
+                tc.SendEventAsync(appevent);
+            }
         }
     }
 }
@@ -108,13 +140,12 @@ namespace TrakerrSampleApp
 
 
 ### Option-3: Send any event (including non-exceptions) programmatically
+You can send non-errors to Trakerr. This will send an event without a stacktrace. Be sure to construct the object properly as the default values in `CreateAppEvent` may not be useful for your non-error.
+
 ```csharp
 using IO.TrakerrClient;
+using IO.Trakerr.Model;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TrakerrSampleApp
 {
@@ -127,9 +158,13 @@ namespace TrakerrSampleApp
         {
             var client = new TrakerrClient();
 
-            var event = client.CreateAppEvent("Info", "System.Exception", "Some message");
+            var infoevent = tc.CreateAppEvent(AppEvent.LogLevelEnum.Info, "User sends clicked this button", "Feature Analytics", "Some Feature");
+            infoevent.EventUser = "jill@trakerr.io";
+            infoevent.EventSession = "2";
 
-            client.SendEventAsync(event);
+            //Populate any other data you want, customdata or overriding default values of the appevent.
+
+            tc.SendEventAsync(infoevent);
         }
     }
 }
@@ -140,27 +175,26 @@ namespace TrakerrSampleApp
 The `TrakerrClient` class above can be constructed to take aditional data, rather than using the configured defaults. The constructor signature is:
 
 ```csharp
-public TrakerrClient(string apiKey = null, string url = null, string contextAppVersion = null,
-string contextEnvName = "development", string contextEnvVersion = null,
-string contextEnvHostname = null, string contextAppOS = null,
-string contextAppOSVersion = null, string contextDataCenter = null,
-string contextDataCenterRegion = null)
+public TrakerrClient(string apiKey = null, string contextAppVersion = null, string contextDeploymentStage = null, string contextEnvLanguage = "C#")
 ```
 
 Nearly all of these have default values when passed in `null`. Below is a list of the arguments, and what Trakerr expects so you can pass in custom data.
 
 Name | Type | Description | Notes
------------- | ------------- | ------------- | -------------
-**apiKey** | **str** | API Key for your application. | Defaults to reading "trakerr.apiKey" property under appSettings from the App.config.
-**url** | **str** | URL to Trakerr. | Defaults to reading "trakerr.url" property under appSettings from the App.config.
-**contextAppVersion** | **str** |  Provide the application version. | Defaults to reading "trakerr.contextAppVersion" property under appSettings from the App.config.
-**contextEnvName** | **str** | Provide the environemnt name (development/staging/production). You can also pass in a custom name. | Defaults to reading "trakerr.contextEnvName" property under appSettings from the App.config.
-**contextEnvVersion** | **str** | (Optional) Provide an optional context environment version. | Defaults to `null`. 
-**contextEnvHostname** | **str** | Provide the current hostname. | Defaults to the current DNS name if available or uses the Machine name as a fallback.
-**contextAppOS** | **str** | Provide an operating system name. | Defaults to Environment.OSVersion.Platform along with the service pack (eg. Win32NT Service Pack 1).
-**contextAppOSVersion** | **str** | Provide an operating system version. | Defaults to Environment.OSVersion.Version.ToString() (eg. 6.1.7601.65536).
-**contextDataCenter** | **str** | (optional) Provide a datacenter name. | Defaults to `null`.
-**contextDataCenterRegion** | **str** | (optional) Provide a datacenter region. | Defaults to `null`.
+------------ | ------------- | -------------  | -------------
+**apiKey** | **string**  | API Key for your application. | Defaults to reading "trakerr.apiKey" property under appSettings from the App.config.
+**contextAppVersion** | **string** | Provide the application version. | Defaults to reading "trakerr.contextAppVersion" property under appSettings from the App.config.
+**contextDevelopmentStage** | **string** | One of development, staging, production; or a custom string. | Default Value: trakerr.deploymentStage or "development" if not provided.
+**contextEnvLanguage** | **string** | Constant string representing the language the application is in. | Default value: "ruby"
+**contextEnvName** | **string** | Name of the CLR the program is running on | Defaults to returning "Microsoft CLR" if using .Net framework or "Mono" if mono. 
+**contextEnvVersion** | **string** | Provide an environment version. | Defaults to reading to the CLR version of .net, or uses reflection to find the mono version.
+**contextEnvHostname** | **string** | Provide the current hostname. | Defaults to the current DNS name if available or uses the Machine name as a fallback.
+**contextAppOS** | **string** | Provide an operating system name. | Defaults to Environment.OSVersion.Platform along with the service pack (eg. Win32NT Service Pack 1).
+**contextAppOSVersion** | **string** | Provide an operating system version. | Defaults to Environment.OSVersion.Version.ToString() (eg. 6.1.7601.65536).
+**contextAppOSBrowser** | **string** | An optional string browser name the application is running on. | Defaults to `null`
+**contextAppOSBrowserVersion** | **string** | An optional string browser version the application is running on. | Defaults to `null`
+**contextDataCenter** | **string** | Data center the application is running on or connected to. | Defaults to `null`
+**contextDataCenterRegion** | **string** | Data center region. | Defaults to `null`
 
 If you want to use a default value in a custom call, simply pass in `null` to the argument, and it will be filled with the default value.
 
