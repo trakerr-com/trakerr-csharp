@@ -29,7 +29,7 @@ namespace IO.TrakerrClient
         {
             var client = new TrakerrClient();
 
-            client.SendEventAsync(client.CreateAppEvent(e, classification));
+            client.SendEventAsync(client.CreateAppEvent(e, AppEvent.LogLevelEnum.Error, classification));
         }
     }
 
@@ -121,14 +121,14 @@ namespace IO.TrakerrClient
         {
             if (apiKey == null) apiKey = ConfigurationManager.AppSettings["trakerr.apiKey"];
             if (contextAppVersion == null) contextAppVersion = ConfigurationManager.AppSettings["trakerr.contextAppVersion"];
-            if (contextDeploymentStage == null) contextDeploymentStage = ConfigurationManager.AppSettings["trakerr.eploymentStage"];
+            if (contextDeploymentStage == null) contextDeploymentStage = ConfigurationManager.AppSettings["trakerr.deploymentStage"];
 
             this.apiKey = apiKey;
             this.contextAppVersion = contextAppVersion;
             this.contextDeploymentStage = contextDeploymentStage;
 
             this.contextEnvLanguage = contextEnvLanguage;
-            this.contextEnvName = Type.GetType("Mono.Runtime") != null ? "Mono" : "Microsoft CLI";
+            this.contextEnvName = Type.GetType("Mono.Runtime") != null ? "Mono" : "Microsoft CLR";
 
             this.contextEnvVersion = null;
             Type type = Type.GetType("Mono.Runtime");
@@ -180,7 +180,7 @@ namespace IO.TrakerrClient
         /// <summary>
         /// Use this to bootstrap a new AppEvent object with the supplied logLevel, classification, event type and message.
         /// </summary>
-        /// <param name="logLevel">String representation of the level (Error/Warning/Info/Debug) of the error, defaults to "Error" if null or passed in something else.</param>
+        /// <param name="logLevel">Level (Error/Warning/Info/Debug) of the error, defaults to "Error" if null or passed in something else.</param>
         /// <param name="classification">Optional extra string descriptor. Defaults to issue.</param>
         /// <param name="eventType">Type of event (eg. System.Exception), defaults to "unknonwn"</param>
         /// <param name="eventMessage">Message, defaults to "unknown"</param>
@@ -196,9 +196,9 @@ namespace IO.TrakerrClient
         /// <param name="exception">The Exception to use to create the new AppEvent</param>
         /// <param name="classification">Optional extra string descriptor. Defaults to issue.</param>
         /// <returns>Newly created AppEvent</returns>
-        public AppEvent CreateAppEvent(Exception exception, string classification = "issue")
+        public AppEvent CreateAppEvent(Exception exception, AppEvent.LogLevelEnum logLevel = AppEvent.LogLevelEnum.Error, string classification = "issue")
         {
-            var exceptionEvent = CreateAppEvent(classification: classification, eventType: exception.GetType().ToString(), eventMessage: exception.Message);
+            var exceptionEvent = CreateAppEvent(logLevel, classification, exception.GetType().ToString(), exception.Message);
 
             exceptionEvent.EventStacktrace = EventTraceBuilder.GetEventTraces(exception);
 
@@ -215,8 +215,8 @@ namespace IO.TrakerrClient
             FillDefaults(appEvent);
 
             var response = eventsApi.EventsPostWithHttpInfo(appEvent);
-            Console.Error.WriteLine("Status Code:" + response.StatusCode);
-            Console.Error.WriteLine(response.Data);
+            /*Console.Error.WriteLine("Status Code:" + response.StatusCode);
+            Console.Error.WriteLine(response.Data);Debug statements*/
         }
 
         /// <summary>
@@ -229,10 +229,20 @@ namespace IO.TrakerrClient
             FillDefaults(appEvent);
 
             var response = await eventsApi.EventsPostAsyncWithHttpInfo(appEvent);
-            await Console.Error.WriteLineAsync("Status Code:" + response.StatusCode);
-            await Console.Error.WriteLineAsync(response.Data.ToString());
+            /*await Console.Error.WriteLineAsync("Status Code:" + response.StatusCode);
+            await Console.Error.WriteLineAsync(response.Data.ToString());Debug statements*/
         }
 
+        /// <summary>
+        /// Creates and sends an AppEvent to Trakerr with the provided Exception and other parameters
+        /// </summary>
+        /// <param name="e">Exception to send to Trakerr</param>
+        /// <param name="logLevel">Level of the exception that you want to be registered to trakerr (Error/Warning/Info/Debug).</param>
+        /// <param name="classification">Optional extra string descriptor. Defaults to issue.</param>
+        public void SendException(Exception e, AppEvent.LogLevelEnum logLevel = AppEvent.LogLevelEnum.Error, string classification = "issue")
+        {
+            SendEventAsync(CreateAppEvent(e, logLevel, classification));
+        }
 
         /// <summary>
         /// Fills the default values for the properties.

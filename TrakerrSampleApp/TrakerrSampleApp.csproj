@@ -55,6 +55,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\generated\src\IO.Trakerr\IO.Trakerr.csproj">
+      <Project>{BB542020-52A0-4488-862D-9232D4777DF4}</Project>
+      <Name>IO.Trakerr</Name>
+    </ProjectReference>
     <ProjectReference Include="..\IO.TrakerrClient\IO.TrakerrClient.csproj">
       <Project>{a0ee88dc-7890-453b-b0cd-0c5d92487188}</Project>
       <Name>IO.TrakerrClient</Name>
