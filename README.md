@@ -185,7 +185,7 @@ Name | Type | Description | Notes
 **apiKey** | **string**  | API Key for your application. | Defaults to reading "trakerr.apiKey" property under appSettings from the App.config.
 **contextAppVersion** | **string** | Provide the application version. | Defaults to reading "trakerr.contextAppVersion" property under appSettings from the App.config.
 **contextDevelopmentStage** | **string** | One of development, staging, production; or a custom string. | Default Value: trakerr.deploymentStage or "development" if not provided.
-**contextEnvLanguage** | **string** | Constant string representing the language the application is in. | Default value: "c#", can be set by the constructor if your using VB or managed C#.
+**contextEnvLanguage** | **string** | Constant string representing the language the application is in. | Default value: "C#", can be set by the constructor if your using VB or managed C++.
 **contextEnvName** | **string** | Name of the CLR the program is running on | Defaults to returning "Microsoft CLR" if using .Net framework or "Mono" if mono. 
 **contextEnvVersion** | **string** | Provide an environment version. | Defaults to reading to the CLR version of .net, or uses reflection to find the mono version.
 **contextEnvHostname** | **string** | Provide the current hostname. | Defaults to the current DNS name if available or uses the Machine name as a fallback.
