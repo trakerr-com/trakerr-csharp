@@ -178,7 +178,7 @@ The `TrakerrClient` class above can be constructed to take aditional data, rathe
 public TrakerrClient(string apiKey = null, string contextAppVersion = null, string contextDeploymentStage = null, string contextEnvLanguage = "C#")
 ```
 
-Nearly all of these have default values when passed in `null`. Below is a list of the arguments, and what Trakerr expects so you can pass in custom data.
+The TrakerrClient class however has a lot of exposed properties. The benefit to setting these immediately after after you create the TrakerrClient is that AppEvent will default it's values against the TrakerClient that created it. This way if there is a value that all your AppEvents uses, and the constructor default value currently doesn't suit you; it may be easier to change it in TrakerrClient as it will become the default value for all AppEvents created after. A lot of these are populated by default value by the constructor, but you can populate them with whatever string data you want. The following table provides an in depth look at each of those.
 
 Name | Type | Description | Notes
 ------------ | ------------- | -------------  | -------------
@@ -195,8 +195,6 @@ Name | Type | Description | Notes
 **contextAppOSBrowserVersion** | **string** | An optional string browser version the application is running on. | Defaults to `null`
 **contextDataCenter** | **string** | Data center the application is running on or connected to. | Defaults to `null`
 **contextDataCenterRegion** | **string** | Data center region. | Defaults to `null`
-
-If you want to use a default value in a custom call, simply pass in `null` to the argument, and it will be filled with the default value.
 
 <a name="documentation-for-models"></a>
 ## Documentation for Models
