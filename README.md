@@ -1,4 +1,4 @@
-# IO.Trakerr - the C# library for the Trakerr API
+# Trakerr-C# API client
 
 Get your application events and errors to Trakerr via the *Trakerr API*.
 
