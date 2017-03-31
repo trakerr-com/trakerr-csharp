@@ -196,7 +196,6 @@ Name | Type | Description | Notes
 **contextDataCenter** | **string** | Data center the application is running on or connected to. | Defaults to `null`
 **contextDataCenterRegion** | **string** | Data center region. | Defaults to `null`
 
-<a name="documentation-for-models"></a>
 ## Documentation for Models
 
  - [Model.AppEvent](https://github.com/trakerr-io/trakerr-csharp/blob/master/generated/docs/AppEvent.md)
