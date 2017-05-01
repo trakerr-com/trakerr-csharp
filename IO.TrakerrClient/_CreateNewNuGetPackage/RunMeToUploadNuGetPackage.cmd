@@ -6,4 +6,4 @@ REM The project's .nupkg file should be in the same directory as the project's .
 REM You may edit the Config.ps1 file to adjust the settings used to upload the package to the NuGet gallery.
 REM To run this script from within Visual Studio, right-click on this file from the Solution Explorer and choose Run.
 SET THIS_SCRIPTS_DIRECTORY=%~dp0
-PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%THIS_SCRIPTS_DIRECTORY%DoNotModify\UploadNuGetPackage.ps1'"
+PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%THIS_SCRIPTS_DIRECTORY%DoNotModify\UploadNuGetPackage.ps1'" -verbose
