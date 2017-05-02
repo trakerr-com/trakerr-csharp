@@ -25,7 +25,7 @@ First setup a sample application and setup App.config to include your API key (s
 <configuration>
 ...
     <appSettings>
-      <add key="trakerr.apiKey" value="<your api key here>" />
+      <add key="trakerr.apiKey" value="<api-key>" />
       <add key="trakerr.url" value="https://trakerr.io/api/v1/" />
       <add key="trakerr.contextAppVersion" value="1.0" />
       <add key="trakerr.contextEnvName" value="development"/>
