@@ -17,7 +17,7 @@ The DLLs included in the package may not be the latest version. We recommend usi
 Install-Package IO.TrakerrClient
 ```
 
-## Getting Started
+## Detailed Integration Guide
 
 First setup a sample application and setup App.config to include your API key (see TrakerrSampleApp project for an example).
 
