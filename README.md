@@ -3,13 +3,14 @@
 Get your application events and errors to Trakerr via the *Trakerr API*.
 
 - API version: 1.0.0
-- SDK version: 1.0.0
+- SDK version: 1.0.1
 
-## Frameworks supported
+### Frameworks supported
 - .NET 4.0 or later
 - Windows Phone 7.1 (Mango) and later.
 
-## Dependencies
+
+## Install SDK dependency using Nuget
 - [IO.TrakerrClient](http://www.nuget.org/packages/IO.TrakerrClient/) - 1.0.0 or later
 
 The DLLs included in the package may not be the latest version. We recommend using [NuGet] (https://docs.nuget.org/consume/installing-nuget) to obtain the latest version of the packages:
@@ -17,8 +18,9 @@ The DLLs included in the package may not be the latest version. We recommend usi
 Install-Package IO.TrakerrClient
 ```
 
-## Detailed Integration Guide
+## 3-minute Integration Guide
 
+### Using App.config for configuration
 First setup a sample application and setup App.config to include your API key (see TrakerrSampleApp project for an example).
 
 ```xml
@@ -28,146 +30,158 @@ First setup a sample application and setup App.config to include your API key (s
       <add key="trakerr.apiKey" value="<api-key>" />
       <add key="trakerr.url" value="https://trakerr.io/api/v1/" />
       <add key="trakerr.contextAppVersion" value="1.0" />
-      <add key="trakerr.contextEnvName" value="development"/>
+      <add key="trakerr.deploymentStage" value="development"/>
     </appSettings>
 </configuration>
 ```
 
-### Option-1: Send an exception to Trakerr
-
 To send an exception to Trakerr, it's as simple as calling .SendToTrakerr() on the exception (see example below).
 
 ```csharp
-using IO.TrakerrClient;
-using System;
-
-namespace TrakerrSampleApp
-{
-    /// <summary>
-    /// Sample program to generate an event
-    /// </summary>
-    class Program
+    using IO.TrakerrClient;
+    ...
+    try
     {
-        static void Main(string[] args)
-        {
-            try
-            {
-                throw new Exception("This is a test exception.");
-            }
-            catch (Exception e)
-            {
-                // Send the event to Trakerr
-                e.SendToTrakerr();
-            }
-        }
+        throw new Exception("This is a test exception.");
     }
-}
+    catch (Exception e)
+    {
+        // Send the event to Trakerr
+        e.SendToTrakerr();
+    }
 ```
 
-### Option-2: Send an exception using the TrakerrClient
-The benifit of using the TrakerrClient to automatically create and send your error, as opposed to above, is that you can change the log level. You will, however, have to also add an import.
+### Without App.config for configuration
 
 ```csharp
-using IO.TrakerrClient;
-using IO.Trakerr.Model;
-using System;
+    using IO.TrakerrClient;
+    using IO.Trakerr.Model;
+    ...
 
-namespace TrakerrSampleApp
-{
-    /// <summary>
-    /// Sample program to generate an event
-    /// </summary>
-    class Program
+    // specify config (without App.config)
+    var trakerrClient = TrakerrClient(
+        "<api-key>",                // API KEY
+        "1.0",                      // Your application version (any string)
+        "production"                // Any custom deployment stage string ("production", "development", "staging" etc.)
+    );
+
+    try
     {
-        static void Main(string[] args)
-        {
-            var client = new TrakerrClient();
-
-            try
-            {
-                throw new ArgumentException("Args are invalid.");
-            }
-            catch (Exception e)
-            {
-                tc.SendException(e);//Can also change the log level, along with the classifcation, unlike the above which only changes issue.
-            }
-        }
+        throw new ArgumentException("Args are invalid.");
     }
-}
-```
-
-### Option-3: Send an exception using the TrakerrClient
-You can get an appevent to change and store custom data. You must then call to manually send it afterwards.
-
-```csharp
-using IO.TrakerrClient;
-using IO.Trakerr.Model;
-using System;
-
-namespace TrakerrSampleApp
-{
-    /// <summary>
-    /// Sample program to generate an event
-    /// </summary>
-    class Program
+    catch (Exception e)
     {
-        static void Main(string[] args)
-        {
-            var client = new TrakerrClient();
-
-            try
-            {
-                throw new IndexOutOfRangeException("Buffer overflow.");
-            }
-            catch (Exception e)
-            {
-                var appevent = tc.CreateAppEvent(e, AppEvent.LogLevelEnum.Fatal);//Can also change the classification.
-                //EventType and EventMessage are set automatically by create app event; you can set them manually from the appevent instance too.
-                appevent.EventUser = "john@trakerr.io";
-                appevent.EventSession = "8";
-
-                appevent.CustomProperties = new CustomData();
-                appevent.CustomProperties.StringData = new CustomStringData("This is string data 1!");//Add up to 10 custom strings.
-                appevent.CustomProperties.StringData.CustomData2 = "This is string data 2!";//You can also add strings later like this.
-
-                tc.SendEventAsync(appevent);
-            }
-        }
+        // You can optionally specify the log level, along with the classifcation in the SendException parameters.
+        // See C# documentation of SendException for more details.
+        trakerrClient.SendException(e);
     }
-}
+
 ```
 
 
+## Detailed Integration Guide
 
-### Option-3: Send any event (including non-exceptions) programmatically
-You can send non-errors to Trakerr. This will send an event without a stacktrace. Be sure to construct the object properly as the default values in `CreateAppEvent` may not be useful for your non-error.
+
+### Option-1: Send an exception to Trakerr
+Use the guide [3-minute integration guide above](#3-minute-Integration-Guide) to send an exception to Trakerr.
+
+
+### Option-2: Send an exception with user, session, custom properties and more
+
+Calling `CreateAppEvent` with an exception as shown below automatically populates the stacktrace information to send to Trakerr.
+
+This call will create a new  [Model.AppEvent](https://github.com/trakerr-io/trakerr-csharp/blob/master/generated/docs/AppEvent.md).
+You can then populate other member data to send to Trakerr using accessors (see [Model.AppEvent](https://github.com/trakerr-io/trakerr-csharp/blob/master/generated/docs/AppEvent.md)
+ for more details on properties that you can set).
+
 
 ```csharp
-using IO.TrakerrClient;
-using IO.Trakerr.Model;
-using System;
+    using IO.TrakerrClient;
+    using IO.Trakerr.Model;
+    ....
 
-namespace TrakerrSampleApp
-{
-    /// <summary>
-    /// Sample program to generate an event
-    /// </summary>
-    class Program
+    // Instantiate the TrakerrClient globally somewhere and store. This is thread-safe.
+    // Specify config without App.config (OR if using App.config you can use the parameterless constructor instead)
+
+    var trakerrClient = TrakerrClient(
+        "<api-key>",                // API KEY
+        "1.0",                      // Your application version (any string)
+        "production"                // Any custom deployment stage string ("production", "development", "staging" etc.)
+    );
+
+    ....
+
+    try
     {
-        static void Main(string[] args)
-        {
-            var client = new TrakerrClient();
-
-            var infoevent = tc.CreateAppEvent(AppEvent.LogLevelEnum.Info, "User sends clicked this button", "Feature Analytics", "Some Feature");
-            infoevent.EventUser = "jill@trakerr.io";
-            infoevent.EventSession = "2";
-
-            //Populate any other data you want, customdata or overriding default values of the appevent.
-
-            tc.SendEventAsync(infoevent);
-        }
+        throw new IndexOutOfRangeException("Buffer overflow.");
     }
-}
+    catch (Exception e)
+    {
+
+        var appevent = trakerrClient.CreateAppEvent(
+            e,                                  // the exception to send to Trakerr
+            AppEvent.LogLevelEnum.Fatal,        // the log level indicating FATAL
+            "Issue"                             // the classification indicating an "Issue"
+        );
+
+        // You can set properties on AppEvent below like user, session, custom properties and more.
+        appevent.EventUser = "john@trakerr.io";
+        appevent.EventSession = "8";
+
+        // Set some custom data
+        appevent.CustomProperties = new CustomData();
+        appevent.CustomProperties.StringData = new CustomStringData("This is string data 1!");//Add up to 10 custom strings.
+        appevent.CustomProperties.StringData.CustomData2 = "This is string data 2!";//You can also add strings later like this.
+
+        // opulate any other data you want, customdata or overriding default values of the appevent.
+        trakerrClient.SendEventAsync(appevent);
+    }
+```
+
+
+### Option-3: Send an event (including non-exceptions) with user, session, custom properties and more
+You can send non-errors to Trakerr. This will send an event without a stacktrace.
+
+This creates a new  [Model.AppEvent](https://github.com/trakerr-io/trakerr-csharp/blob/master/generated/docs/AppEvent.md)
+ using `CreateAppEvent`. You can then populate other member data using accessors (see [Model.AppEvent](https://github.com/trakerr-io/trakerr-csharp/blob/master/generated/docs/AppEvent.md)
+ for more details on properties that you can set).
+
+```csharp
+    using IO.TrakerrClient;
+    using IO.Trakerr.Model;
+
+    ...
+
+    // Instantiate the TrakerrClient globally somewhere and store. This is thread-safe.
+    // Specify config without App.config (OR if using App.config you can use the parameterless constructor instead)
+
+    var trakerrClient = TrakerrClient(
+        "<api-key>",                // API KEY
+        "1.0",                      // Your application version (any string)
+        "production"                // Any custom deployment stage string ("production", "development", "staging" etc.)
+    );
+
+    ....
+
+    // Create an event and then send it to Trakerr
+    var infoevent = trakerrClient.CreateAppEvent(
+        AppEvent.LogLevelEnum.Info,     // log level (logLevel in API)
+        "Database",                     // classification -- user defined (classification in API)
+        "MySQL.INSERT",                 // type -- user defined (eventType in API)
+        "Success inserting data"        // some message -- user defined (eventMessage in API)
+    );
+
+    // You can set properties on AppEvent below like user, session, custom properties and more.
+    infoevent.EventUser = "jill@trakerr.io";
+    infoevent.EventSession = "2";
+
+    // Set some custom data like database instance connected to and database region
+    infoevent.CustomProperties = new CustomData();
+    infoevent.CustomProperties.StringData = new CustomStringData("east.mysql.trakerr.com");//Add up to 10 custom strings.
+    infoevent.CustomProperties.StringData.CustomData2 = "region-1"; //You can also add strings later like this.
+
+    // Populate any other data you want, customdata or overriding default values of the appevent.
+    trakerrClient.SendEventAsync(infoevent);
 ```
 
 ## About the TrakerrClient Constructor
