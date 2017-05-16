@@ -127,6 +127,7 @@ You can then populate other member data to send to Trakerr using accessors (see 
         // You can set properties on AppEvent below like user, session, custom properties and more.
         appevent.EventUser = "john@trakerr.io";
         appevent.EventSession = "8";
+        appevent.appevent.ContextOperationTimeMillis = 1000;
 
         // Set some custom data
         appevent.CustomProperties = new CustomData();
@@ -194,6 +195,8 @@ public TrakerrClient(string apiKey = null, string contextAppVersion = null, stri
 
 The TrakerrClient class also has a lot of exposed properties. The benefit to setting these immediately after after you create TrakerrClient is that AppEvent will default it's values against the TrakerClient that created it. This way if there is a value that all your AppEvents uses, and the constructor default value currently doesn't suit you; it may be easier to change it in TrakerrClient as it will become the default value for all AppEvents created after. A lot of these are populated by default value by the constructor, but you can populate them with whatever string data you want. The following table provides an in depth look at each of those.
 
+If you're populating an app event directly, you'll want to take a look at the [AppEvent properties](generated/docs/AppEvent.md) as they contain properties unique to each AppEvent which do not have defaults you may set in the client.
+
 Name | Type | Description | Notes
 ------------ | ------------- | -------------  | -------------
 **apiKey** | **string**  | API Key for your application. | Defaults to reading "trakerr.apiKey" property under appSettings from the App.config.
@@ -209,6 +212,8 @@ Name | Type | Description | Notes
 **contextAppOSBrowserVersion** | **string** | An optional string browser version the application is running on. | Defaults to `null`
 **contextDataCenter** | **string** | Data center the application is running on or connected to. | Defaults to `null`
 **contextDataCenterRegion** | **string** | Data center region. | Defaults to `null`
+**contextAppSKU** | **string** | Application SKU context. | Defaults to `null`
+**contextTags** | **List<string>** | Any tags that describe the the module that this handler is for. | Defaults to `null`
 
 ## Documentation for Models
 
