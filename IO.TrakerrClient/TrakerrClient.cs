@@ -61,7 +61,6 @@ namespace IO.TrakerrClient
     {
         private static DateTime DT_EPOCH = new DateTime(1970, 1, 1);
         private EventsApi eventsApi;
-        private bool isFirstCPUPoll;
         private PerformanceCounter cpuCounter;
 
         public string apiKey { get; set; }
@@ -139,8 +138,8 @@ namespace IO.TrakerrClient
         /// <param name="contextTags">Array</param>
         public TrakerrClient(string apiKey = null, string contextAppVersion = null, string contextDeploymentStage = null, string contextEnvLanguage = "C#", string contextAppSKU = null, List<string> contextTags = null)
         {
-            isFirstCPUPoll = true;
             cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+            cpuCounter.NextValue();
             if (apiKey == null) apiKey = ConfigurationManager.AppSettings["trakerr.apiKey"];
             if (contextAppVersion == null) contextAppVersion = ConfigurationManager.AppSettings["trakerr.ContextAppVersion"];
             if (contextDeploymentStage == null) contextDeploymentStage = ConfigurationManager.AppSettings["trakerr.deploymentStage"];
@@ -294,14 +293,6 @@ namespace IO.TrakerrClient
 
             //Get the CPU info.
             appEvent.ContextCpuPercentage = (int)Math.Round(cpuCounter.NextValue(), MidpointRounding.AwayFromZero);
-            if (isFirstCPUPoll)
-            {
-                //The first time the cpuCounter is called, it has no refrence for the percentage.
-                //We can artificially create it by waiting a second.
-                Thread.Sleep(1000);
-                appEvent.ContextCpuPercentage = (int)Math.Round(cpuCounter.NextValue(), MidpointRounding.AwayFromZero);
-                isFirstCPUPoll = false;
-            }
 
             //Memory info. Possible to do with the same type of parsing above,
             //but VB has it built in and we can access it through the CLR since they share libraries.
