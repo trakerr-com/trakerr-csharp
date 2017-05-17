@@ -94,7 +94,7 @@ namespace IO.Trakerr.Model
         /// </summary>
         /// <param name="ApiKey">API key generated for the application (required).</param>
         /// <param name="LogLevel">(optional) Logging level, one of &#39;debug&#39;,&#39;info&#39;,&#39;warning&#39;,&#39;error&#39;, &#39;fatal&#39;, defaults to &#39;error&#39;.</param>
-        /// <param name="Classification">(optional) one of &#39;error&#39; or a custom string for non-errors, defaults to &#39;error&#39; (required).</param>
+        /// <param name="Classification">(optional) one of &#39;issue&#39; or a custom string for non-issues, defaults to &#39;issue&#39; (required).</param>
         /// <param name="EventType">type of the event or error (eg. NullPointerException) (required).</param>
         /// <param name="EventMessage">message containing details of the event or error (required).</param>
         /// <param name="EventTime">(optional) event time in ms since epoch.</param>
@@ -113,9 +113,17 @@ namespace IO.Trakerr.Model
         /// <param name="ContextAppOSVersion">(optional) OS version the application is running on.</param>
         /// <param name="ContextDataCenter">(optional) Data center the application is running on or connected to.</param>
         /// <param name="ContextDataCenterRegion">(optional) Data center region.</param>
+        /// <param name="ContextTags">ContextTags.</param>
+        /// <param name="ContextURL">(optional) The full URL when running in a browser when the event was generated..</param>
+        /// <param name="ContextOperationTimeMillis">(optional) duration that this event took to occur in millis. Example - database call time in millis..</param>
+        /// <param name="ContextCpuPercentage">(optional) CPU utilization as a percent when event occured.</param>
+        /// <param name="ContextMemoryPercentage">(optional) Memory utilization as a percent when event occured.</param>
+        /// <param name="ContextCrossAppCorrelationId">(optional) Cross application correlation ID.</param>
+        /// <param name="ContextDevice">(optional) Device information.</param>
+        /// <param name="ContextAppSku">(optional) Application SKU.</param>
         /// <param name="CustomProperties">CustomProperties.</param>
         /// <param name="CustomSegments">CustomSegments.</param>
-        public AppEvent(string ApiKey = null, LogLevelEnum? LogLevel = null, string Classification = null, string EventType = null, string EventMessage = null, long? EventTime = null, Stacktrace EventStacktrace = null, string EventUser = null, string EventSession = null, string ContextAppVersion = null, string DeploymentStage = null, string ContextEnvName = null, string ContextEnvLanguage = null, string ContextEnvVersion = null, string ContextEnvHostname = null, string ContextAppBrowser = null, string ContextAppBrowserVersion = null, string ContextAppOS = null, string ContextAppOSVersion = null, string ContextDataCenter = null, string ContextDataCenterRegion = null, CustomData CustomProperties = null, CustomData CustomSegments = null)
+        public AppEvent(string ApiKey = null, LogLevelEnum? LogLevel = null, string Classification = null, string EventType = null, string EventMessage = null, long? EventTime = null, Stacktrace EventStacktrace = null, string EventUser = null, string EventSession = null, string ContextAppVersion = null, string DeploymentStage = null, string ContextEnvName = null, string ContextEnvLanguage = null, string ContextEnvVersion = null, string ContextEnvHostname = null, string ContextAppBrowser = null, string ContextAppBrowserVersion = null, string ContextAppOS = null, string ContextAppOSVersion = null, string ContextDataCenter = null, string ContextDataCenterRegion = null, List<string> ContextTags = null, string ContextURL = null, long? ContextOperationTimeMillis = null, int? ContextCpuPercentage = null, int? ContextMemoryPercentage = null, string ContextCrossAppCorrelationId = null, string ContextDevice = null, string ContextAppSku = null, CustomData CustomProperties = null, CustomData CustomSegments = null)
         {
             // to ensure "ApiKey" is required (not null)
             if (ApiKey == null)
@@ -170,6 +178,14 @@ namespace IO.Trakerr.Model
             this.ContextAppOSVersion = ContextAppOSVersion;
             this.ContextDataCenter = ContextDataCenter;
             this.ContextDataCenterRegion = ContextDataCenterRegion;
+            this.ContextTags = ContextTags;
+            this.ContextURL = ContextURL;
+            this.ContextOperationTimeMillis = ContextOperationTimeMillis;
+            this.ContextCpuPercentage = ContextCpuPercentage;
+            this.ContextMemoryPercentage = ContextMemoryPercentage;
+            this.ContextCrossAppCorrelationId = ContextCrossAppCorrelationId;
+            this.ContextDevice = ContextDevice;
+            this.ContextAppSku = ContextAppSku;
             this.CustomProperties = CustomProperties;
             this.CustomSegments = CustomSegments;
         }
@@ -181,9 +197,9 @@ namespace IO.Trakerr.Model
         [DataMember(Name="apiKey", EmitDefaultValue=false)]
         public string ApiKey { get; set; }
         /// <summary>
-        /// (optional) one of &#39;error&#39; or a custom string for non-errors, defaults to &#39;error&#39;
+        /// (optional) one of &#39;issue&#39; or a custom string for non-issues, defaults to &#39;issue&#39;
         /// </summary>
-        /// <value>(optional) one of &#39;error&#39; or a custom string for non-errors, defaults to &#39;error&#39;</value>
+        /// <value>(optional) one of &#39;issue&#39; or a custom string for non-issues, defaults to &#39;issue&#39;</value>
         [DataMember(Name="classification", EmitDefaultValue=false)]
         public string Classification { get; set; }
         /// <summary>
@@ -294,6 +310,53 @@ namespace IO.Trakerr.Model
         [DataMember(Name="contextDataCenterRegion", EmitDefaultValue=false)]
         public string ContextDataCenterRegion { get; set; }
         /// <summary>
+        /// Gets or Sets ContextTags
+        /// </summary>
+        [DataMember(Name="contextTags", EmitDefaultValue=false)]
+        public List<string> ContextTags { get; set; }
+        /// <summary>
+        /// (optional) The full URL when running in a browser when the event was generated.
+        /// </summary>
+        /// <value>(optional) The full URL when running in a browser when the event was generated.</value>
+        [DataMember(Name="contextURL", EmitDefaultValue=false)]
+        public string ContextURL { get; set; }
+        /// <summary>
+        /// (optional) duration that this event took to occur in millis. Example - database call time in millis.
+        /// </summary>
+        /// <value>(optional) duration that this event took to occur in millis. Example - database call time in millis.</value>
+        [DataMember(Name="contextOperationTimeMillis", EmitDefaultValue=false)]
+        public long? ContextOperationTimeMillis { get; set; }
+        /// <summary>
+        /// (optional) CPU utilization as a percent when event occured
+        /// </summary>
+        /// <value>(optional) CPU utilization as a percent when event occured</value>
+        [DataMember(Name="contextCpuPercentage", EmitDefaultValue=false)]
+        public int? ContextCpuPercentage { get; set; }
+        /// <summary>
+        /// (optional) Memory utilization as a percent when event occured
+        /// </summary>
+        /// <value>(optional) Memory utilization as a percent when event occured</value>
+        [DataMember(Name="contextMemoryPercentage", EmitDefaultValue=false)]
+        public int? ContextMemoryPercentage { get; set; }
+        /// <summary>
+        /// (optional) Cross application correlation ID
+        /// </summary>
+        /// <value>(optional) Cross application correlation ID</value>
+        [DataMember(Name="contextCrossAppCorrelationId", EmitDefaultValue=false)]
+        public string ContextCrossAppCorrelationId { get; set; }
+        /// <summary>
+        /// (optional) Device information
+        /// </summary>
+        /// <value>(optional) Device information</value>
+        [DataMember(Name="contextDevice", EmitDefaultValue=false)]
+        public string ContextDevice { get; set; }
+        /// <summary>
+        /// (optional) Application SKU
+        /// </summary>
+        /// <value>(optional) Application SKU</value>
+        [DataMember(Name="contextAppSku", EmitDefaultValue=false)]
+        public string ContextAppSku { get; set; }
+        /// <summary>
         /// Gets or Sets CustomProperties
         /// </summary>
         [DataMember(Name="customProperties", EmitDefaultValue=false)]
@@ -332,6 +395,14 @@ namespace IO.Trakerr.Model
             sb.Append("  ContextAppOSVersion: ").Append(ContextAppOSVersion).Append("\n");
             sb.Append("  ContextDataCenter: ").Append(ContextDataCenter).Append("\n");
             sb.Append("  ContextDataCenterRegion: ").Append(ContextDataCenterRegion).Append("\n");
+            sb.Append("  ContextTags: ").Append(ContextTags).Append("\n");
+            sb.Append("  ContextURL: ").Append(ContextURL).Append("\n");
+            sb.Append("  ContextOperationTimeMillis: ").Append(ContextOperationTimeMillis).Append("\n");
+            sb.Append("  ContextCpuPercentage: ").Append(ContextCpuPercentage).Append("\n");
+            sb.Append("  ContextMemoryPercentage: ").Append(ContextMemoryPercentage).Append("\n");
+            sb.Append("  ContextCrossAppCorrelationId: ").Append(ContextCrossAppCorrelationId).Append("\n");
+            sb.Append("  ContextDevice: ").Append(ContextDevice).Append("\n");
+            sb.Append("  ContextAppSku: ").Append(ContextAppSku).Append("\n");
             sb.Append("  CustomProperties: ").Append(CustomProperties).Append("\n");
             sb.Append("  CustomSegments: ").Append(CustomSegments).Append("\n");
             sb.Append("}\n");
@@ -476,6 +547,46 @@ namespace IO.Trakerr.Model
                     this.ContextDataCenterRegion.Equals(other.ContextDataCenterRegion)
                 ) && 
                 (
+                    this.ContextTags == other.ContextTags ||
+                    this.ContextTags != null &&
+                    this.ContextTags.SequenceEqual(other.ContextTags)
+                ) && 
+                (
+                    this.ContextURL == other.ContextURL ||
+                    this.ContextURL != null &&
+                    this.ContextURL.Equals(other.ContextURL)
+                ) && 
+                (
+                    this.ContextOperationTimeMillis == other.ContextOperationTimeMillis ||
+                    this.ContextOperationTimeMillis != null &&
+                    this.ContextOperationTimeMillis.Equals(other.ContextOperationTimeMillis)
+                ) && 
+                (
+                    this.ContextCpuPercentage == other.ContextCpuPercentage ||
+                    this.ContextCpuPercentage != null &&
+                    this.ContextCpuPercentage.Equals(other.ContextCpuPercentage)
+                ) && 
+                (
+                    this.ContextMemoryPercentage == other.ContextMemoryPercentage ||
+                    this.ContextMemoryPercentage != null &&
+                    this.ContextMemoryPercentage.Equals(other.ContextMemoryPercentage)
+                ) && 
+                (
+                    this.ContextCrossAppCorrelationId == other.ContextCrossAppCorrelationId ||
+                    this.ContextCrossAppCorrelationId != null &&
+                    this.ContextCrossAppCorrelationId.Equals(other.ContextCrossAppCorrelationId)
+                ) && 
+                (
+                    this.ContextDevice == other.ContextDevice ||
+                    this.ContextDevice != null &&
+                    this.ContextDevice.Equals(other.ContextDevice)
+                ) && 
+                (
+                    this.ContextAppSku == other.ContextAppSku ||
+                    this.ContextAppSku != null &&
+                    this.ContextAppSku.Equals(other.ContextAppSku)
+                ) && 
+                (
                     this.CustomProperties == other.CustomProperties ||
                     this.CustomProperties != null &&
                     this.CustomProperties.Equals(other.CustomProperties)
@@ -540,6 +651,22 @@ namespace IO.Trakerr.Model
                     hash = hash * 59 + this.ContextDataCenter.GetHashCode();
                 if (this.ContextDataCenterRegion != null)
                     hash = hash * 59 + this.ContextDataCenterRegion.GetHashCode();
+                if (this.ContextTags != null)
+                    hash = hash * 59 + this.ContextTags.GetHashCode();
+                if (this.ContextURL != null)
+                    hash = hash * 59 + this.ContextURL.GetHashCode();
+                if (this.ContextOperationTimeMillis != null)
+                    hash = hash * 59 + this.ContextOperationTimeMillis.GetHashCode();
+                if (this.ContextCpuPercentage != null)
+                    hash = hash * 59 + this.ContextCpuPercentage.GetHashCode();
+                if (this.ContextMemoryPercentage != null)
+                    hash = hash * 59 + this.ContextMemoryPercentage.GetHashCode();
+                if (this.ContextCrossAppCorrelationId != null)
+                    hash = hash * 59 + this.ContextCrossAppCorrelationId.GetHashCode();
+                if (this.ContextDevice != null)
+                    hash = hash * 59 + this.ContextDevice.GetHashCode();
+                if (this.ContextAppSku != null)
+                    hash = hash * 59 + this.ContextAppSku.GetHashCode();
                 if (this.CustomProperties != null)
                     hash = hash * 59 + this.CustomProperties.GetHashCode();
                 if (this.CustomSegments != null)

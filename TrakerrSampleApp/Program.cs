@@ -50,6 +50,7 @@ namespace TrakerrSampleApp
                 appevent.CustomProperties = new CustomData();
                 appevent.CustomProperties.StringData = new CustomStringData("This is string data 1!");//Add up to 10 custom strings.
                 appevent.CustomProperties.StringData.CustomData2 = "This is string data 2!";//You can also add strings later like this.
+                appevent.ContextOperationTimeMillis = 1000;
 
                 tc.SendEventAsync(appevent);
             }
@@ -63,7 +64,7 @@ namespace TrakerrSampleApp
 
             tc.SendEventAsync(infoevent);
 
-            Console.In.ReadLine();//Give time for the Async tasks to print to console for the sample app.
+            //Console.In.ReadLine();//Give time for the Async tasks to print to console for the sample app.
         }
     }
 }

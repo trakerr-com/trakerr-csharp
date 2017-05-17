@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 VisualStudioVersion = 12.0.0.0
 MinimumVisualStudioVersion = 10.0.0.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Trakerr", "src\IO.Trakerr\IO.Trakerr.csproj", "{E4AC3EC0-A3C3-4272-94DA-7C20E00AA3A6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Trakerr", "src\IO.Trakerr\IO.Trakerr.csproj", "{3D68940C-B90A-43A4-8B7A-3B2A08FDEBE5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Trakerr.Test", "src\IO.Trakerr.Test\IO.Trakerr.Test.csproj", "{19F1DEBC-DE5E-4517-8062-F000CD499087}"
 EndProject
@@ -12,10 +12,10 @@ Debug|Any CPU = Debug|Any CPU
 Release|Any CPU = Release|Any CPU
 EndGlobalSection
 GlobalSection(ProjectConfigurationPlatforms) = postSolution
-{E4AC3EC0-A3C3-4272-94DA-7C20E00AA3A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-{E4AC3EC0-A3C3-4272-94DA-7C20E00AA3A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-{E4AC3EC0-A3C3-4272-94DA-7C20E00AA3A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-{E4AC3EC0-A3C3-4272-94DA-7C20E00AA3A6}.Release|Any CPU.Build.0 = Release|Any CPU
+{3D68940C-B90A-43A4-8B7A-3B2A08FDEBE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+{3D68940C-B90A-43A4-8B7A-3B2A08FDEBE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+{3D68940C-B90A-43A4-8B7A-3B2A08FDEBE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+{3D68940C-B90A-43A4-8B7A-3B2A08FDEBE5}.Release|Any CPU.Build.0 = Release|Any CPU
 {19F1DEBC-DE5E-4517-8062-F000CD499087}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 {19F1DEBC-DE5E-4517-8062-F000CD499087}.Debug|Any CPU.Build.0 = Debug|Any CPU
 {19F1DEBC-DE5E-4517-8062-F000CD499087}.Release|Any CPU.ActiveCfg = Release|Any CPU
