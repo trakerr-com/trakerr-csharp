@@ -1,9 +1,13 @@
-﻿using IO.Trakerr.Api;
+﻿//#define NO_PERF
+
+using IO.Trakerr.Api;
 using IO.Trakerr.Client;
 using IO.Trakerr.Model;
 
 using Microsoft.Win32;
+#if !NO_PERF
 using Microsoft.VisualBasic.Devices;
+#endif
 
 using System;
 using System.Collections.Generic;
@@ -12,7 +16,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Threading;
+using System.ComponentModel;
 
 /// <summary>
 /// Trakerr.IO namespace
@@ -138,8 +142,24 @@ namespace IO.TrakerrClient
         /// <param name="contextTags">Array</param>
         public TrakerrClient(string apiKey = null, string contextAppVersion = null, string contextDeploymentStage = null, string contextEnvLanguage = "C#", string contextAppSKU = null, List<string> contextTags = null)
         {
-            cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-            cpuCounter.NextValue();
+            try
+            {
+                cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+                cpuCounter.NextValue();
+            }
+            catch (Win32Exception)
+            {
+                //Error with the WMI.
+            }
+            catch (PlatformNotSupportedException)
+            {
+                //Windows this program is run on is too old.
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Console.Error.WriteLine("Logger does not have permission to get the CPU info");
+            }
+
             if (apiKey == null) apiKey = ConfigurationManager.AppSettings["trakerr.apiKey"];
             if (contextAppVersion == null) contextAppVersion = ConfigurationManager.AppSettings["trakerr.ContextAppVersion"];
             if (contextDeploymentStage == null) contextDeploymentStage = ConfigurationManager.AppSettings["trakerr.deploymentStage"];
@@ -155,9 +175,16 @@ namespace IO.TrakerrClient
             Type type = Type.GetType("Mono.Runtime");
             if (type != null)
             {
-                MethodInfo displayName = type.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
-                if (displayName != null)
-                    this.ContextEnvVersion = displayName.Invoke(null, null).ToString();
+                try
+                {
+                    MethodInfo displayName = type.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static);
+                    if (displayName != null)
+                        this.ContextEnvVersion = displayName.Invoke(null, null).ToString();
+                }
+                catch
+                {
+                    //Reflection on mono classes not providing any valid responses.
+                }
             }
             else
             {
@@ -168,7 +195,7 @@ namespace IO.TrakerrClient
                 catch
                 {
                     this.ContextEnvVersion = null;
-                }   
+                }
             }
 
             if (ContextEnvHostname == null)
@@ -177,11 +204,11 @@ namespace IO.TrakerrClient
                 {
                     this.ContextEnvHostname = Dns.GetHostName();
                 }
-                catch(SocketException)
+                catch (SocketException)
                 {
                     this.ContextEnvHostname = Environment.MachineName;
                 }
-            } 
+            }
             else
             {
                 this.ContextEnvHostname = ContextEnvHostname;
@@ -204,7 +231,7 @@ namespace IO.TrakerrClient
         /// <param name="eventMessage">Message, defaults to "unknown"</param>
         /// <returns>Newly created AppEvent</returns>
         public AppEvent CreateAppEvent(AppEvent.LogLevelEnum logLevel = AppEvent.LogLevelEnum.Error, string classification = "issue", string eventType = "unknown", string eventMessage = "unknown")
-        {            
+        {
             return new AppEvent(this.apiKey, logLevel, classification, eventType, eventMessage);
         }
 
@@ -292,15 +319,36 @@ namespace IO.TrakerrClient
             if (!appEvent.EventTime.HasValue) appEvent.EventTime = (long)(DateTime.Now - DT_EPOCH).TotalMilliseconds;
 
             //Get the CPU info.
-            appEvent.ContextCpuPercentage = (int)Math.Round(cpuCounter.NextValue(), MidpointRounding.AwayFromZero);
+            if (cpuCounter != null)
+            {
+                try
+                {
+                     appEvent.ContextCpuPercentage = (int)Math.Round(cpuCounter.NextValue(), MidpointRounding.AwayFromZero);
+                }
+                catch (Win32Exception)
+                {
+                    //Error with the WMI.
+                }
+                catch (PlatformNotSupportedException)
+                {
+                    //Windows this program is run on is too old.
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    //Needs to be run from a more elavted positions.
+                }
 
+            }
+           
+
+#if !NO_PERF
             //Memory info. Possible to do with the same type of parsing above,
             //but VB has it built in and we can access it through the CLR since they share libraries.
             ComputerInfo ci = new ComputerInfo();
             //1.0 to make it a decimal operation.
-            double usedMemoryPercent = ((ci.TotalPhysicalMemory - ci.AvailablePhysicalMemory) / (ci.TotalPhysicalMemory *1.0)) * 100;
+            double usedMemoryPercent = ((ci.TotalPhysicalMemory - ci.AvailablePhysicalMemory) / (ci.TotalPhysicalMemory * 1.0)) * 100;
             appEvent.ContextMemoryPercentage = (int)Math.Round(usedMemoryPercent, MidpointRounding.AwayFromZero);
-
+#endif
             appEvent.ContextAppSku = ContextAppSKU;
             appEvent.ContextTags = ContextTags;
         }
