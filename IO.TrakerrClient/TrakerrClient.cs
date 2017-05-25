@@ -268,12 +268,12 @@ namespace IO.TrakerrClient
         /// Send the AppEvent to Trakerr asynchronously. If any of the parameters supplied in the constructor are not supplied in the AppEvent parameter, this will auto-populate those members before sending the event to Trakerr.
         /// </summary>
         /// <param name="appEvent">The event to send</param>
-        public async void SendEventAsync(AppEvent appEvent)
+        public async System.Threading.Tasks.Task<ApiResponse<Object>> SendEventAsync(AppEvent appEvent)
         {
             // fill defaults if not overridden in the AppEvent being passed
             FillDefaults(appEvent);
 
-            var response = await eventsApi.EventsPostAsyncWithHttpInfo(appEvent);
+            return await eventsApi.EventsPostAsyncWithHttpInfo(appEvent);
             /*await Console.Error.WriteLineAsync("Status Code:" + response.StatusCode);
             await Console.Error.WriteLineAsync(response.Data.ToString());Debug statements*/
         }
