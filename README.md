@@ -2,9 +2,6 @@
 
 Get your application events and errors to Trakerr via the *Trakerr API*.
 
-- API version: 1.0.0
-- SDK version: 1.0.1
-
 ### Frameworks supported
 - .NET 4.0 or later
 - Windows Phone 7.1 (Mango) and later.
