@@ -63,8 +63,10 @@ namespace IO.TrakerrClient
     public class TrakerrClient
     {
         private static DateTime DT_EPOCH = new DateTime(1970, 1, 1);
+        private static CPUUsageTrackerFactory.CPUUsageTracker CPU_PERF = CPUUsageTrackerFactory.CpuUsageTracker;
+
         private EventsApi eventsApi;
-        private static CPUUsageTrackerFactory.CPUUsageTracker cpuperf = CPUUsageTrackerFactory.CpuUsageTracker;
+
 
         public string apiKey { get; set; }
         public string ContextAppVersion { get; set; }
@@ -170,13 +172,13 @@ namespace IO.TrakerrClient
             }
             else
             {
-                try//Code might not work on non-windows.
+                try
                 {
                     this.ContextEnvVersion = TrakerrClient.Get45PlusFromRegistry();
                 }
                 catch
                 {
-                    this.ContextEnvVersion = null;
+                    //Code might not work on non-windows.
                 }
             }
 
@@ -301,7 +303,7 @@ namespace IO.TrakerrClient
 
             if (!appEvent.EventTime.HasValue) appEvent.EventTime = (long)(DateTime.Now - DT_EPOCH).TotalMilliseconds;
 
-            if (appEvent.ContextCpuPercentage == null) appEvent.ContextCpuPercentage = cpuperf.CpuPercentUse;
+            if (appEvent.ContextCpuPercentage == null) appEvent.ContextCpuPercentage = CPU_PERF.CpuPercentUse;
 
 #if !NO_PERF
             //Memory info. Possible to do with the same type of parsing above,
@@ -321,7 +323,7 @@ namespace IO.TrakerrClient
         /// <param name="forceShutdown"></param>
         public static void Shutdown(bool forceShutdown)
         {
-            cpuperf.Shutdown(forceShutdown);
+            CPU_PERF.Shutdown(forceShutdown);
         }
 
         private static string Get45PlusFromRegistry()
