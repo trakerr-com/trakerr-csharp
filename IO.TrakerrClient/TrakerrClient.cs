@@ -64,7 +64,7 @@ namespace IO.TrakerrClient
     {
         private static DateTime DT_EPOCH = new DateTime(1970, 1, 1);
         private EventsApi eventsApi;
-        private CPUUsageTrackerFactory.CPUUsageTracker cpuperf = CPUUsageTrackerFactory.CpuUsageTracker;
+        private static CPUUsageTrackerFactory.CPUUsageTracker cpuperf = CPUUsageTrackerFactory.CpuUsageTracker;
 
         public string apiKey { get; set; }
         public string ContextAppVersion { get; set; }
@@ -319,7 +319,7 @@ namespace IO.TrakerrClient
         /// 
         /// </summary>
         /// <param name="forceShutdown"></param>
-        public void Shutdown(bool forceShutdown)
+        public static void Shutdown(bool forceShutdown)
         {
             cpuperf.Shutdown(forceShutdown);
         }

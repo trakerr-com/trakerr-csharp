@@ -92,7 +92,7 @@ namespace TrakerrSampleApp
 
             await tc.SendEventAsync(infoevent);
             // Console.In.ReadLine();//Give time for the Async tasks to print to console for the sample app.
-            tc.Shutdown(false);
+            TrakerrClient.Shutdown(false);
         }
     }
 }
