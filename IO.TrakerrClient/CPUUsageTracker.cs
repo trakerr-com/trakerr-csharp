@@ -94,36 +94,28 @@ namespace IO.TrakerrClient
             /// </summary>
             private void Poll()
             {
-                try
+                while (true)
                 {
-                    while (true)
+                    if (shutdown) return;
+                    try
                     {
-                        if (shutdown) return;
-                        try
-                        {
-                            CpuPercentUse = (int)Math.Round(cpuCounter.NextValue(), MidpointRounding.AwayFromZero);
-                        }
-                        catch (Win32Exception)
-                        {
-                            //Error with the WMI.
-                        }
-                        catch (PlatformNotSupportedException)
-                        {
-                            //Windows this program is run on is too old.
-                            return;
-                        }
-                        catch (UnauthorizedAccessException)
-                        {
-                            //Needs to be run from a more elavted positions.
-                            return;
-                        }
-                        Thread.Sleep(interval);
+                        CpuPercentUse = (int)Math.Round(cpuCounter.NextValue(), MidpointRounding.AwayFromZero);
                     }
-
-                }
-                finally
-                {
-                    Console.WriteLine("CPU THREAD EXITTING: " + shutdown);
+                    catch (Win32Exception)
+                    {
+                        //Error with the WMI.
+                    }
+                    catch (PlatformNotSupportedException)
+                    {
+                        //The Windows this program is run on is too old.
+                        return;
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                        //Needs to be run from a more elavted positions.
+                        return;
+                    }
+                    Thread.Sleep(interval);
                 }
 
             }
