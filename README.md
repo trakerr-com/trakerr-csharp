@@ -75,7 +75,7 @@ To send an exception to Trakerr, it's as simple as calling .SendToTrakerr() on t
 
 ```
 
-## Additional Application TrakerrClient Cleanup
+## Trakerr Client Shutdown
 When cleaning up your application, or implementing a shutdown, be sure to call
 
 ```csharp
@@ -87,7 +87,7 @@ TrakerrClient tc = new TrakerrClient(...)
 tc.Shutdown(false);
 ```
 
-This will close the CPU monitoring thread gracefully. If an error has occurred passing `true` pass a hard thread abort. Do not pass true unless absolutely nessarry.
+This will close the CPU monitoring thread gracefully. If an error has occurred passing `true` pass a hard thread abort. Do not pass true unless absolutely necessary.
 
 ## Detailed Integration Guide
 ### Option-1: Send an exception to Trakerr
