@@ -12,11 +12,9 @@ using Microsoft.VisualBasic.Devices;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-using System.ComponentModel;
 
 /// <summary>
 /// Trakerr.IO namespace
@@ -65,7 +63,7 @@ namespace IO.TrakerrClient
     {
         private static DateTime DT_EPOCH = new DateTime(1970, 1, 1);
         private EventsApi eventsApi;
-        private PerformanceCounter cpuCounter;
+        private CPUUsageTracker cpuperf;
 
         public string apiKey { get; set; }
         public string ContextAppVersion { get; set; }
@@ -142,23 +140,6 @@ namespace IO.TrakerrClient
         /// <param name="contextTags">Array</param>
         public TrakerrClient(string apiKey = null, string contextAppVersion = null, string contextDeploymentStage = null, string contextEnvLanguage = "C#", string contextAppSKU = null, List<string> contextTags = null)
         {
-            try
-            {
-                cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-                cpuCounter.NextValue();
-            }
-            catch (Win32Exception)
-            {
-                //Error with the WMI.
-            }
-            catch (PlatformNotSupportedException)
-            {
-                //Windows this program is run on is too old.
-            }
-            catch (UnauthorizedAccessException)
-            {
-                Console.Error.WriteLine("Logger does not have permission to get the CPU info");
-            }
 
             if (apiKey == null) apiKey = ConfigurationManager.AppSettings["trakerr.apiKey"];
             if (contextAppVersion == null) contextAppVersion = ConfigurationManager.AppSettings["trakerr.ContextAppVersion"];
@@ -220,6 +201,8 @@ namespace IO.TrakerrClient
             eventsApi = new EventsApi(ConfigurationManager.AppSettings["trakerr.url"]);
             this.ContextTags = contextTags;
             this.ContextAppSKU = contextAppSKU;
+
+            cpuperf = CPUUsageTracker.CpuUsageTracker;
         }
 
         /// <summary>
@@ -318,28 +301,7 @@ namespace IO.TrakerrClient
 
             if (!appEvent.EventTime.HasValue) appEvent.EventTime = (long)(DateTime.Now - DT_EPOCH).TotalMilliseconds;
 
-            //Get the CPU info.
-            if (cpuCounter != null)
-            {
-                try
-                {
-                     appEvent.ContextCpuPercentage = (int)Math.Round(cpuCounter.NextValue(), MidpointRounding.AwayFromZero);
-                }
-                catch (Win32Exception)
-                {
-                    //Error with the WMI.
-                }
-                catch (PlatformNotSupportedException)
-                {
-                    //Windows this program is run on is too old.
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    //Needs to be run from a more elavted positions.
-                }
-
-            }
-           
+            if (appEvent.ContextCpuPercentage == null) appEvent.ContextCpuPercentage = cpuperf.CpuPercentUse;
 
 #if !NO_PERF
             //Memory info. Possible to do with the same type of parsing above,
@@ -351,6 +313,15 @@ namespace IO.TrakerrClient
 #endif
             appEvent.ContextAppSku = ContextAppSKU;
             appEvent.ContextTags = ContextTags;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="forceShutdown"></param>
+        public void Shutdown(bool forceShutdown)
+        {
+            cpuperf.Shutdown(forceShutdown);
         }
 
         private static string Get45PlusFromRegistry()
@@ -390,6 +361,11 @@ namespace IO.TrakerrClient
             // This code should never execute. A non-null release key should mean
             // that 4.5 or later is installed.
             return "No 4.5 or later version detected";
+        }
+
+        ~TrakerrClient()
+        {
+            cpuperf.Shutdown(false);
         }
 
     }

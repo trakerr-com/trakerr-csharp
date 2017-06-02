@@ -11,10 +11,16 @@ namespace TrakerrSampleApp
     {
         static void Main(string[] args)
         {
+            execute();
+            return;
+        }
+        public static async void execute()
+        {
+            System.Threading.Thread.Sleep(2000);
             //Option 1: Send to Trakerr automatically.
             try
             {
-                
+
                 throw new Exception("This is a test exception.");
             }
             catch (Exception e)
@@ -52,7 +58,7 @@ namespace TrakerrSampleApp
                 appevent.CustomProperties.StringData.CustomData2 = "This is string data 2!";//You can also add strings later like this.
                 appevent.ContextOperationTimeMillis = 1000;
 
-                tc.SendEventAsync(appevent);
+                await tc.SendEventAsync(appevent);
             }
 
             //Option 4: Send a non-exception to Trakerr.
@@ -62,9 +68,10 @@ namespace TrakerrSampleApp
 
             //Populate any other data you want, customdata or overriding default values of the appevent.
 
-            tc.SendEventAsync(infoevent);
-
-            //Console.In.ReadLine();//Give time for the Async tasks to print to console for the sample app.
+            await tc.SendEventAsync(infoevent);
+            Console.In.ReadLine();//Give time for the Async tasks to print to console for the sample app.
         }
     }
 }
+
+
