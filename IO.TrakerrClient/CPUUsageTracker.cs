@@ -5,22 +5,8 @@ using System.Threading;
 
 namespace IO.TrakerrClient
 {
-    class CPUUsageTracker
+    public sealed class CPUUsageTrackerFactory
     {
-        private static CPUUsageTracker cpuusagetracker;
-        private static uint numref = 0;
-
-        private PerformanceCounter cpuCounter;
-        private volatile int cpupercentuse = 0;
-        private Thread pollingthread;
-        private int interval;
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool IsShutdown { get; private set; }
-
         /// <summary>
         /// 
         /// </summary>
@@ -28,89 +14,30 @@ namespace IO.TrakerrClient
         {
             get
             {
-                if (cpuusagetracker == null)
-                {
-                    cpuusagetracker = new CPUUsageTracker(1000);
-                }
-                numref++;
-                return cpuusagetracker;
+                return CPUUsageTracker.instance;
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public int CpuPercentUse
+        public sealed class CPUUsageTracker
         {
-            get
-            {
-                return cpupercentuse;
-            }
-            private set
-            {
-                cpupercentuse = value;
-            }
-        }
+            internal static readonly CPUUsageTracker instance = new CPUUsageTracker(1000);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="pollinterval"></param>
-        private CPUUsageTracker(int pollinterval)
-        {
-            try
-            {
-                cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-                cpuCounter.NextValue();
-            }
-            catch (Win32Exception)
-            {
-                //Error with the WMI.
-            }
-            catch (PlatformNotSupportedException)
-            {
-                //Windows this program is run on is too old.
-            }
-            catch (UnauthorizedAccessException)
-            {
-                Console.Error.WriteLine("Logger does not have permission to get the CPU info");
-            }
-            interval = pollinterval;
+            private volatile bool shutdown = false;
+            private PerformanceCounter cpuCounter;
+            private Thread pollingthread;
+            private int interval;
+            private volatile int cpupercentuse = 0;
 
-            if (cpuCounter != null)
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="pollinterval"></param>
+            private CPUUsageTracker(int pollinterval)
             {
-                pollingthread = new Thread(new ThreadStart(Poll));
-                pollingthread.Start();
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="forceShudown"></param>
-        public void Shutdown(bool forceShudown)
-        {
-            if (numref > 0) numref--;
-            if (numref == 0) IsShutdown = true;
-
-            if (pollingthread != null && forceShudown)
-            {
-                pollingthread.Abort();
-                IsShutdown = true;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private void Poll()
-        {
-            while (true)
-            {
-                if (IsShutdown) return;
                 try
                 {
-                    CpuPercentUse = (int)Math.Round(cpuCounter.NextValue(), MidpointRounding.AwayFromZero);
+                    cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+                    cpuCounter.NextValue();
                 }
                 catch (Win32Exception)
                 {
@@ -122,12 +49,86 @@ namespace IO.TrakerrClient
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    //Needs to be run from a more elavted positions.
+                    Console.Error.WriteLine("Logger does not have permission to get the CPU info");
                 }
-                Thread.Sleep(interval);
+                interval = pollinterval;
+
+                if (cpuCounter != null)
+                {
+                    pollingthread = new Thread(new ThreadStart(Poll));
+                    pollingthread.Start();
+                }
             }
 
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public int CpuPercentUse
+            {
+                get
+                {
+                    return cpupercentuse;
+                }
+                private set
+                {
+                    cpupercentuse = value;
+                }
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="forceShudown"></param>
+            public void Shutdown(bool forceShudown)
+            {
+                shutdown = true;
+                if (pollingthread != null && forceShudown)
+                {
+                    pollingthread.Abort();
+                }
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            private void Poll()
+            {
+                try
+                {
+                    while (true)
+                    {
+                        if (shutdown) return;
+                        try
+                        {
+                            CpuPercentUse = (int)Math.Round(cpuCounter.NextValue(), MidpointRounding.AwayFromZero);
+                        }
+                        catch (Win32Exception)
+                        {
+                            //Error with the WMI.
+                        }
+                        catch (PlatformNotSupportedException)
+                        {
+                            //Windows this program is run on is too old.
+                            return;
+                        }
+                        catch (UnauthorizedAccessException)
+                        {
+                            //Needs to be run from a more elavted positions.
+                            return;
+                        }
+                        Thread.Sleep(interval);
+                    }
+
+                }
+                finally
+                {
+                    Console.WriteLine("CPU THREAD EXITTING: " + shutdown);
+                }
+
+            }
         }
+
     }
 
 

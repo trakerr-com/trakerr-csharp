@@ -37,7 +37,8 @@ namespace IO.TrakerrClient
         {
             var client = new TrakerrClient();
 
-            client.SendEventAsync(client.CreateAppEvent(e, AppEvent.LogLevelEnum.Error, classification));
+            var task = client.SendEventAsync(client.CreateAppEvent(e, AppEvent.LogLevelEnum.Error, classification));
+            task.Wait();
         }
     }
 
@@ -63,7 +64,7 @@ namespace IO.TrakerrClient
     {
         private static DateTime DT_EPOCH = new DateTime(1970, 1, 1);
         private EventsApi eventsApi;
-        private CPUUsageTracker cpuperf;
+        private CPUUsageTrackerFactory.CPUUsageTracker cpuperf = CPUUsageTrackerFactory.CpuUsageTracker;
 
         public string apiKey { get; set; }
         public string ContextAppVersion { get; set; }
@@ -201,8 +202,6 @@ namespace IO.TrakerrClient
             eventsApi = new EventsApi(ConfigurationManager.AppSettings["trakerr.url"]);
             this.ContextTags = contextTags;
             this.ContextAppSKU = contextAppSKU;
-
-            cpuperf = CPUUsageTracker.CpuUsageTracker;
         }
 
         /// <summary>
@@ -269,7 +268,8 @@ namespace IO.TrakerrClient
         /// <param name="classification">Optional extra string descriptor. Defaults to issue.</param>
         public void SendException(Exception e, AppEvent.LogLevelEnum logLevel = AppEvent.LogLevelEnum.Error, string classification = "issue")
         {
-            SendEventAsync(CreateAppEvent(e, logLevel, classification));
+            var task = SendEventAsync(CreateAppEvent(e, logLevel, classification));
+            task.Wait();
         }
 
         /// <summary>
@@ -362,11 +362,5 @@ namespace IO.TrakerrClient
             // that 4.5 or later is installed.
             return "No 4.5 or later version detected";
         }
-
-        ~TrakerrClient()
-        {
-            cpuperf.Shutdown(false);
-        }
-
     }
 }
