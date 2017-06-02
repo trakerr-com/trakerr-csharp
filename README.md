@@ -78,7 +78,7 @@ To send an exception to Trakerr, it's as simple as calling .SendToTrakerr() on t
 
 ```
 
-## Closing the logger
+## Additional Application TrakerrClient Cleanup
 When cleaning up your application, or implementing a shutdown, be sure to call
 
 ```csharp
