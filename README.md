@@ -2,10 +2,24 @@
 
 Get your application events and errors to Trakerr via the *Trakerr API*.
 
+You can send both **errors and non-errors** (plain log statements, for example) to Trakerr with this API.
+
+## Overview
+
+The **3-minute guide** is primarily oriented around sending **errors or warnings** and also do not allow sending additional
+parameters. **Option-3 in the detailed integration guide** describes how you could send a non-error (or any log statement) along with additional parameters.
+
+The SDK takes performance impact seriously and all communication between the SDK <=> Trakerr avoids blocking the calling function. The SDK also applies asynchronous patterns where applicable.
+
+A Trakerr *Event* is what is created by this SDK and is then sent to Trakerr for Trakerr to capture. A Trakerr *Event* can consist of various parameters as described here in [Model.AppEvent](https://github.com/trakerr-io/trakerr-csharp/blob/master/generated/docs/AppEvent.md).
+Some of these parameters are populated by default and others are optional and can be supplied by you.
+
+Since some of these parameters are common across all event's, the API has the option of setting these on the
+TrakerrClient instance (described towards the bottom) and offers a factory API for creating AppEvent's.
+
 ### Frameworks supported
 - .NET 4.0 or later
 - Windows Phone 7.1 (Mango) and later.
-
 
 ## Install SDK dependency using Nuget
 - [IO.TrakerrClient](http://www.nuget.org/packages/IO.TrakerrClient/) - 1.0.0 or later
@@ -197,7 +211,7 @@ public TrakerrClient(string apiKey = null, string contextAppVersion = null, stri
 
 The TrakerrClient class also has a lot of exposed properties. The benefit to setting these immediately after after you create TrakerrClient is that AppEvent will default it's values against the TrakerClient that created it. This way if there is a value that all your AppEvents uses, and the constructor default value currently doesn't suit you; it may be easier to change it in TrakerrClient as it will become the default value for all AppEvents created after. A lot of these are populated by default value by the constructor, but you can populate them with whatever string data you want. The following table provides an in depth look at each of those.
 
-If you're populating an app event directly, you'll want to take a look at the [AppEvent properties](generated/docs/AppEvent.md) as they contain properties unique to each AppEvent which do not have defaults you may set in the client.
+If you're populating an app event directly, you'll want to take a look at the [AppEvent properties](https://github.com/trakerr-io/trakerr-csharp/blob/master/generated/docs/AppEvent.md) as they contain properties unique to each AppEvent which do not have defaults you may set in the client.
 
 Name | Type | Description | Notes
 ------------ | ------------- | -------------  | -------------
