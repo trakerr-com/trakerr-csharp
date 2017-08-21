@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>IO.TrakerrClient</id>
+    <version>1.2.3.0</version>
+    <title>IO.TrakerrClient</title>
+    <authors>Trakerr</authors>
+    <owners>Astav</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Trakerr C# Client API</description>
+    <copyright>Copyright © 2017</copyright>
+    <dependencies>
+      <dependency id="IO.Trakerr" version="1.0.0.0" />
+    </dependencies>
+    <releaseNotes>
+    </releaseNotes>
+  </metadata>
+  <files>
+    <file src="bin\Debug\IO.Trakerr.dll" target="lib\net452" />
+    <file src="bin\Debug\Newtonsoft.Json.dll" target="lib\net452" />
+    <file src="bin\Debug\RestSharp.dll" target="lib\net452" />
+  </files>
+</package>

@@ -275,6 +275,16 @@ namespace IO.TrakerrClient
         }
 
         /// <summary>
+        /// Creates and sends an AppEvent to Trakerr with the provided Exception and other parameters and sends it async
+        /// </summary>
+        /// <param name="e">Exception to send to Trakerr</param>
+        /// <param name="logLevel">Level of the exception that you want to be registered to trakerr (Error/Warning/Info/Debug).</param>
+        /// <param name="classification">Optional extra string descriptor. Defaults to issue.</param>
+        public async System.Threading.Tasks.Task<ApiResponse<Object>> SendExceptionAsync(Exception e, AppEvent.LogLevelEnum logLevel = AppEvent.LogLevelEnum.Error, string classification = "issue")
+        {
+            return await SendEventAsync(CreateAppEvent(e, logLevel, classification)).ConfigureAwait(false);
+        }
+        /// <summary>
         /// Fills the default values for the properties.
         /// </summary>
         /// <param name="appEvent">The event to populate data with.</param>

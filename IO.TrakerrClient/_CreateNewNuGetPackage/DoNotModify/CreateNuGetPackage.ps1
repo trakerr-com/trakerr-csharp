@@ -71,6 +71,7 @@ else { Write-Output "Using user-specified Pack Properties value '$packProperties
 if (!(Test-Path Variable:Private:packOptions) -or (Test-StringIsNullOrWhitespace $packOptions)) { $packOptions = ""; Write-Output "Using default Pack Options value."  }
 else { Write-Output "Using user-specified Pack Options value '$packOptions'." }
 
+
 # Join the Configuration and Platform into the rest of the pack Properties.
 $packProperties = ($packPropertiesConfigurationAndPlatform + $packProperties).TrimEnd(';')
 

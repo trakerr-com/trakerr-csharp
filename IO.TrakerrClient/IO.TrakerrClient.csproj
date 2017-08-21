@@ -62,7 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\generated\src\IO.Trakerr\IO.Trakerr.csproj">
-      <Project>{ac7618be-72dc-4015-b2fb-4703f9745f9f}</Project>
+      <Project>{bb542020-52a0-4488-862d-9232d4777df4}</Project>
       <Name>IO.Trakerr</Name>
     </ProjectReference>
   </ItemGroup>

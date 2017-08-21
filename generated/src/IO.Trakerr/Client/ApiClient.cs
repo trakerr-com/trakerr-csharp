@@ -91,7 +91,7 @@ namespace IO.Trakerr.Client
         public ApiClient(String basePath = "https://www.trakerr.io/api/v1")
         {
            if (String.IsNullOrEmpty(basePath))
-                throw new ArgumentException("basePath cannot be empty");
+                basePath = "https://www.trakerr.io/api/v1";
 
             RestClient = new RestClient(basePath);
             Configuration = Configuration.Default;
